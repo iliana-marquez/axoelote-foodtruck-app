@@ -57,7 +57,7 @@ Project Board: [GitHub Projects kanban board](https://github.com/users/iliana-ma
 - As a **Visitor/Customer** I can **see the menu** so that **I know what the food truck offers.**
 
 3. **About page**
-- As a **Visitor/Customer** I can **click on the about link** so that **sI can read the about who Axoelote is.**
+- As a **Visitor/Customer** I can **click on the about link** so that **I can read the about who Axoelote is.**
 
 4. **Account creation and login**
 - As a **Customer** I can **sign up and login** so that **I can make booking requests.**
@@ -96,8 +96,8 @@ The BOOKING_REQUEST to EVENT workflow automates the owner's most profitable acti
 The conditional display logic (private vs open events) maintains customer trust by providing transparent availability information without compromising private client confidentiality. Customers see accurate schedule information while private event details remain protected.
 4. **Data Integrity for Business Operations:**
 The intentional redundancy between BOOKING_REQUEST and EVENT serves audit and customer service functions. When disputes arise or customers need booking confirmations, the original request data remains intact even if event details are modified for operational reasons.
-5. **Growth Support Infrastructure:** *(future implementation)*
-Models like TESTIMONIAL and SOCIAL_MEDIA_POST support marketing efforts essential for food truck visibility. The CONTACT_INQUIRY system handles general business questions that don't require bookings, reducing administrative overhead.
+5. **Growth Support Infrastructure:** 
+Models like TESTIMONIAL and SOCIAL_MEDIA_POST support marketing efforts essential for food truck visibility *(future implementation)*. The CONTACT_INQUIRY system handles general business questions that don't require bookings, reducing administrative overhead.
 
 **Technical Decisions Supporting Business Needs**
 1. **Automatic Event Creation:**
