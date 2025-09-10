@@ -34,40 +34,41 @@ Axoelote Food Truck Webapp Live
 ## Feature driven user stories
 <details>
 <summary>Click to display the stories 👇</summary>
+<br>
 
 **User types:** Site Owner, Customer, Visitor
 
-## Implemented
+**Implemented Features**
 
-**Current location and opening hours**
+1. **Current location and opening hours**
 - As a **Site Owner** I can *manage regular opening hours and locations* so that *customers see default information when no special events are scheduled.*
 - As a **Visitor/Customer** I can *see the current location and opening hours* so that *I can plan my visit ahead.*
 
-**Menu offer**
+2. **Menu offer**
 - As a **Visitor/Customer** I can *see the menu* so that *I know what the food truck offers.*
 
-**About the site**
+3. **About the site**
 - As a **Visitor/Customer** I can *click on the about* link *so that I can read the about who Axoelote is.*
 
-**Account creation and login**
+4. **Account creation and login**
 - As a **Customer** I can *sign up and login* so that *I can make booking requests.*
 
-**Booking requests & events**
+5. **Booking requests & events**
 - As a **Customer** I can *fill out a form* so that *I can send a booking request.*
 - As a **Site Owner** I can *receive, see and manage booking requests* so that *I can confirm the request and book the event.*
 - As a **Site Owner** I can *create events from booking requests or personal engagements* so that that *I can have my events displayed up to date.*
 
-**Contact inquiries**
+6. **Contact inquiries**
 - As a **Site Owner** I can see and manage contact inquiries so that I can address them
 - As a **Visitor/Customer** I can send a message so that I can request information or make inquiries
 
-## Future implementation
+**Future implementation**
 
-**Instagram posts**
+1. **Instagram posts**
 - As a **Site Owner** I can Add Instagram post URLs so that they can be displayed on the landing page
 - As a **Customer** I can view instagram posts so that I can see what the offer looks like
 
-**Testimonials**
+2. **Testimonials**
 - As a **Site Owner**, I can review and categorize customer testimonials so that I can display relevant feedback to visitors
 - As a **Customer** I can submit feedback about my experience so that I can share my opinion with other potential customers
 
