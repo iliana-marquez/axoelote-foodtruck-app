@@ -25,52 +25,61 @@ Axoelote Food Truck Webapp Live
 
 #### The Details:
 
-- [Feature driven user stories](#feature-driven-user-stories)
+- [Development Methodology](#development-methodology)
+- [Feature Driven User Stories](#feature-driven-user-stories)
 - [Database Structure](#database-structure)
 - [](#)
 
+## Development Methodology
 
+This project follows Agile development principles with user stories organized using the MoSCoW prioritization method (Must Have, Should Have, Could Have, Won't Have). All user stories and development progress are tracked through a GitHub Projects kanban board.
 
-## Feature driven user stories
+Project Board: [GitHub Projects kanban board](https://github.com/users/iliana-marquez/projects/13/views/1)
+
+## Feature Driven User Stories
+
+**User types:** 
+
+- **Site Owner**: Focus on business management capabilities including booking approval, event creation, and content management through Django admin interface.
+- **Customer/Visitor**: Emphasize user experience for location discovery, event booking, and general inquiries with mobile-first responsive design.
+
 <details>
 <summary>Click to display the stories 👇</summary>
 <br>
 
-**User types:** Site Owner, Customer, Visitor
-
 **Implemented Features**
 
 1. **Current location and opening hours**
-- As a **Site Owner** I can *manage regular opening hours and locations* so that *customers see default information when no special events are scheduled.*
-- As a **Visitor/Customer** I can *see the current location and opening hours* so that *I can plan my visit ahead.*
+- As a **Site Owner** I can **manage regular opening hours and locations** so that **customers see default information when no special events are scheduled.**
+- As a **Visitor/Customer** I can **see the current location and opening hours** so that **I can plan my visit ahead.**
 
 2. **Menu offer**
-- As a **Visitor/Customer** I can *see the menu* so that *I know what the food truck offers.*
+- As a **Visitor/Customer** I can **see the menu** so that **I know what the food truck offers.**
 
-3. **About the site**
-- As a **Visitor/Customer** I can *click on the about* link *so that I can read the about who Axoelote is.*
+3. **About page**
+- As a **Visitor/Customer** I can **click on the about link** so that **sI can read the about who Axoelote is.**
 
 4. **Account creation and login**
-- As a **Customer** I can *sign up and login* so that *I can make booking requests.*
+- As a **Customer** I can **sign up and login** so that **I can make booking requests.**
 
 5. **Booking requests & events**
-- As a **Customer** I can *fill out a form* so that *I can send a booking request.*
-- As a **Site Owner** I can *receive, see and manage booking requests* so that *I can confirm the request and book the event.*
-- As a **Site Owner** I can *create events from booking requests or personal engagements* so that that *I can have my events displayed up to date.*
+- As a **Customer** I can **fill out a form** so that **I can send a booking request.**
+- As a **Site Owner** I can **receive, see and manage booking requests** so that **I can confirm the request and book the event.**
+- As a **Site Owner** I can **create events from booking requests or personal engagements** so that that **I can have my events displayed up to date.**
 
 6. **Contact inquiries**
-- As a **Site Owner** I can see and manage contact inquiries so that I can address them
-- As a **Visitor/Customer** I can send a message so that I can request information or make inquiries
+- As a **Site Owner** I can **see and manage contact inquiries** so that **I can reply back**
+- As a **Visitor/Customer** I can **send a message** so that **I can request information or make inquiries**
 
 **Future implementation**
 
 1. **Instagram posts**
-- As a **Site Owner** I can Add Instagram post URLs so that they can be displayed on the landing page
-- As a **Customer** I can view instagram posts so that I can see what the offer looks like
+- As a **Site Owner** I can **add Instagram post URLs** so that **they can be displayed on the landing page**
+- As a **Customer** I can **view instagram posts** so that **I can see what the offer looks like**
 
 2. **Testimonials**
-- As a **Site Owner**, I can review and categorize customer testimonials so that I can display relevant feedback to visitors
-- As a **Customer** I can submit feedback about my experience so that I can share my opinion with other potential customers
+- As a **Site Owner**, I can **review and categorize customer testimonials** so that **I can display relevant feedback to visitors**
+- As a **Customer** I can **submit feedback about my experience** so that **I can share my opinion with other potential customers**
 
 </details>
 
