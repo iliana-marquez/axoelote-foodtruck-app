@@ -1,1 +1,1 @@
-web: axoelote_foodtruck.wsgi
+web: gunicorn axoelote_foodtruck.wsgi
