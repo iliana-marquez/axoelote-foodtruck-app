@@ -1,3 +1,32 @@
-body {
-    background-color: aqua;
+a {
+    font-family: 'Gluten', cursive;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+/* General text and paragraphs */
+p, body {
+    font-family: 'Figtree', sans-serif;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Permanent Marker', cursive;
+}
+
+
+/* Footer */
+footer {
+    background-color: rgb(212, 14, 77);
+    color: white;
+}
+
+footer a {
+    color: white;
+}
+
+footer ul li {
+    display: flex;
+    align-items: center; 
+    padding: 10px;
 }
