@@ -43,7 +43,9 @@
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
+                        {% if request.resolver_match.url_name != 'booking_request' %}
                         <a class="nav-link" href="{% url 'booking_request' %}">Book Me!</a>
+                        {% endif %}
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == logout_url %}active{% endif %}" aria-current="page"
@@ -72,7 +74,17 @@
             </div>
         </div>
     </nav>
-    
+
+        <!-- Display Django messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
     <main class="flex-grow-1">
 
         {% block content %}
@@ -87,19 +99,24 @@
             <div class="row justify-content-center">
                 <div class="col-12">
                     <ul class="d-flex justify-content-center list-unstyled m-0">
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">About</a></li>
-                        <li><a href="#">Contact</a></li>
-                        <li><a href="#-questions">Bookings</a></li>
-                        <li><a href="#" style="pointer-events: none; color: gray;">Privacy</a></li>
+                        <li><a href="{% url 'home' %}">Home</a></li>
+                        <li>
+                            {% if request.resolver_match.url_name != 'booking_request' %}
+                            <a class="nav-link" href="{% url 'booking_request' %}">Bookings</a>
+                            {% endif %}
+                        </li>
                     </ul>
                 </div>
                 <div class="col-12 d-flex flex-column flex-md-row text-center justify-content-center align-items-center">
-                    <p class="col-12 col-sm-4 m-0 text-center text-md-end">Built for Axoelote</p>
-                    <div class="col-12 col-sm-3 p-2">
-                        <i class="fa-regular fa-copyright"></i>
+                    <div class="col-12 col-sm-4 m-0">
+                        <p class="m-0 text-center text-white">Follow us: <i class="fab fa-facebook-square ms-3"></i>
+                            <i class="fab fa-twitter-square ms-3"></i>
+                            <i class="fab fa-instagram-square ms-3"></i>
+                            <i class="fab fa-youtube-square ms-3"></i>
+                        </p>
                     </div>
-                    <p class="col-12 col-sm-4 m-0 text-center text-md-start">by yours truly: <a href="https://iliana.codefactory.live/" target="_blank"><span>IM-WEBDEV</span></a></p>
+                    <p class="col-12 col-sm-4 m-0 text-center"> 2025 <i class="fa-regular fa-copyright"></i> Built for Axoelote</p>
+                    <p class="col-12 col-sm-4 m-0 text-center">by yours truly: <a href="https://iliana.codefactory.live/" target="_blank"><span>IM-WEBDEV</span></a></p>
                 </div> 
             </div>
         </div>
