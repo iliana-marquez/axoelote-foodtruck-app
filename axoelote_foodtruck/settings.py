@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'django_countries',
     'home',
+    'booking',
 ]
 
 SITE_ID = 1
