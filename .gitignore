@@ -3,3 +3,7 @@ env.py
 __pycache__/
 db.sqlite3
 staticfiles/
+templates/mfa
+templates/openid
+templates/socialaccount
+templates/tests
