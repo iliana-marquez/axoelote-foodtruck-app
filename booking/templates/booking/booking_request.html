@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Book Your Event - Axolotl Food Truck{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if user.is_authenticated %}
+        <!-- Authenticated User: Show Booking Form -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card">
+                    <div class="card-header bg-danger-subtle text-center">
+                        <h2 class="mb-0">Book Your Event</h2>
+                        <p class="mb-0">Tell us about your event and we'll get back to you within 48 hours</p>
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- Display form errors if any -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Event Details Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h4 class="border-bottom pb-2 mb-3">Details</h4>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    {{ form.event_title|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    {{ form.event_type|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    {{ form.guest_count|as_crispy_field }}
+                                    <small class="form-text text-muted">Minimum 70 guests required</small>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    {{ form.start_datetime|as_crispy_field }}
+                                    <small class="form-text text-muted">Must be at least 72 hours in advance</small>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    {{ form.end_datetime|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <!-- Location Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h4 class="border-bottom pb-2 mb-3">Event Location</h4>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    {{ form.street_address|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    {{ form.postcode|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    {{ form.town_or_city|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    {{ form.country|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <!-- Event Description Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h4 class="border-bottom pb-2 mb-3">Event Information</h4>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    {{ form.description|as_crispy_field }}
+                                    <small class="form-text text-muted">Required for open events. Describe the event for public display.</small>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    {{ form.message|as_crispy_field }}
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    {{ form.event_photo|as_crispy_field }}
+                                    <small class="form-text text-muted">Optional: Upload a photo of your venue or event inspiration</small>
+                                </div>
+                            </div>
+
+                            <!-- Important Notice -->
+                            <div class="alert bg-danger-subtle mb-4">
+                                <h5 class="alert-heading">Important Information</h5>
+                                <ul class="mb-0">
+                                    <li>Minimum 70 guests required for all events</li>
+                                    <li>Bookings must be made at least 72 hours in advance</li>
+                                    <li>We'll respond to your request within 48 hours</li>
+                                    <li>If no special dietary requirements are mentioned, our standard menu will apply</li>
+                                </ul>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <button type="submit" class="rounded-pill btn btn-white btn-dark border-danger-subtle btn-lg px-5">
+                                        Submit Booking Request
+                                    </button>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            By submitting this form, you agree to our terms and conditions
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide description field based on event type (open or private)
+    const eventTypeField = document.getElementById('id_event_type');
+    const descriptionField = document.querySelector('[for="id_description"]').closest('.mb-3');
+    
+    function toggleDescription() {
+        if (eventTypeField.value === 'open') {
+            descriptionField.style.display = 'block';
+        } else {
+            descriptionField.style.display = 'none';
+        }
+    }
+    
+    if (eventTypeField) {
+        eventTypeField.addEventListener('change', toggleDescription);
+        toggleDescription(); // Run on page load
+    }
+});
+</script>
+{% endblock %}
