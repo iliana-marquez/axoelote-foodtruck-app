@@ -4,7 +4,7 @@
 <!-- index.html content starts here -->
 
     <!-- Booking CTA -->
-    <section id="booking-cta" class="container border rounded text-center my-5 bg-danger-subtle p-5">
+    <section id="booking-cta" class="container border rounded text-center bg-danger-subtle p-4 pt-0">
       <img src="https://res.cloudinary.com/dj2lk9daf/image/upload/v1757925276/axoelote-logo_pb6fgg.png" 
            alt="Axoelote Logo" 
            class="img-fluid mb-3" 
@@ -28,7 +28,7 @@
 
       <div class="row g-4">
         {% for day in schedule_data %}
-          <div class="col-12 col-sm-4">
+          <div class="col-12 col-sm-4 col-lg-3">
             <div class="p-3 border rounded h-100 text-center">
               <h5 class="mb-3">
                 {{ day.date|date:"l, M d" }}
