@@ -41,7 +41,7 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
   - [Local Development](#local-development)
   - [Production Deployment](#production-deployment)
 - [Future Enhancements](#future-enhancements)
-- [Contact & Support](#contact--support)
+- [Usage Instructions](#usage-instructions)
 - [Acknowledgements](#acknowledgements)
 - [Key Takeaways](#acknowledgements)
     - [Planning vs. Agility Balance](#planning-vs-agility-balance)
