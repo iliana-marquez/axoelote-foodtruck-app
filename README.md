@@ -183,7 +183,7 @@ axoelote_foodtruck/
 **Comprehensive Test Coverage**
 ```bash
 # Form Testing
-python manage.py test booking.tests  # 15 passing tests
+python manage.py test booking.test_forms  # 15 passing tests
 python manage.py test booking.test_views  # 10 passing tests
 
 # Test Categories Covered:
