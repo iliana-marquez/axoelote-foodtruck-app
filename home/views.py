@@ -7,9 +7,11 @@ from .models import RegularSchedule
 
 
 def get_schedule_for_date(target_date):
+    """Get schedule item for a specific date with priority logic"""
     # Priority 1: Active events
     events = Event.objects.filter(
-        start_datetime__date=target_date,
+        start_datetime__date__lte=target_date,  # Event starts on or before target date
+        end_datetime__date__gte=target_date,    # Event ends on or after target date
         status='active'
     )
     if events.exists():
@@ -17,7 +19,8 @@ def get_schedule_for_date(target_date):
 
     # Priority 2: Approved bookings
     approved_bookings = BookingRequest.objects.filter(
-        start_datetime__date=target_date,
+        start_datetime__date__lte=target_date,
+        end_datetime__date__gte=target_date,
         status='approved'
     )
     if approved_bookings.exists():
