@@ -16,6 +16,7 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
   - [Key Features](#key-features)
 - [Technology Stack](#technology-stack)
   - [Backend](#backend)
+  - [Development Tools](#development-tools)
   - [Frontend](#frontend)
   - [Deployment](#deployment)
 - [Database Schema (ERD)](#database-schema-erd)
@@ -99,7 +100,7 @@ As a **visitor**, I want:
 ### Development Tools
 - **Visual Studio Code**: Primary code editor and IDE
 - **Git**: Version control system
-- **GitHub**: Repository hosting and project management 
+- **GitHub**: [Repository](https://github.com/iliana-marquez/axoelote-foodtruck-app) hosting and project management ([GitHub Project](https://github.com/users/iliana-marquez/projects/13/views/1))
 
 ### Deployment
 - **Heroku**: Cloud platform hosting
@@ -422,3 +423,8 @@ Being adaptable and understanding the core business purposes enabled building ro
 
 ### Development Velocity
 The combination of solid planning and flexible execution were key on the delivery of a production-ready MVP, which demonstrates that good architecture enables rapid feature development and deployment.
+
+## Links
+
+- **Live Application:** [Axoelote Food Truck Webapp](https://axoelote-foodtruck-6de5775aa776.herokuapp.com/)
+- **GitHub Repository:** [axoelote-foodtruck-app](https://github.com/iliana-marquez/axoelote-foodtruck-app)
