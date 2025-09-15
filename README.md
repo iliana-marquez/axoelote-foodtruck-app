@@ -76,7 +76,7 @@ As a **visitor**, I want:
 ### Key Features
 
 - **Customer Booking System**: Authenticated users can submit catering requests with 72-hour advance notice
-- **Event Management**: Admin-controlled event creation with conflict prevention 
+- **Event Management**: Admin-controlled event creation and schedule management
 - **Dynamic Schedule Display**: Real-time location information prioritizing events over regular schedule
 - **Multi-day Event Support**: Proper handling of events spanning multiple days
 - **File Upload Integration**: Cloudinary-powered image handling for events and bookings
@@ -338,10 +338,17 @@ end_datetime__date__gte=target_date
 Currently, the system allows overlapping bookings and events to be created and edited through separate interfaces.  
 Although initial attempts were made to handle this at the form-validation level, the logic was not reliable and has not been implemented in production.  
 
+### Cross-Day Event Schedule Override
+Events spanning midnight (e.g., wedding 18:00-02:00) currently override the following day's regular schedule entirely. This may prevent normal operations when the food truck could realistically serve the regular schedule after late events conclude. 
+
+
 **Future Enhancement:**  
 - Implement database-level constraints and comprehensive conflict checking across all booking and event creation methods.  
 - Ensure that admin-created events and customer booking requests cannot overlap for the same date/time.  
 - Provide clear error messages to users when a requested slot is unavailable.  
+- Implement time-aware schedule logic that considers event end times vs. regular schedule start times
+- Establish business rules with stakeholders for minimum prep/setup time between events
+- Add configurable buffer periods to determine when regular schedule should resume
 
 ### Display Logic Edge Cases
 When multiple approved bookings exist for the same day, only the first booking displays in the schedule. The system doesn't break but could provide more complete information.
@@ -384,7 +391,8 @@ The application is configured for Heroku deployment with:
 
 ### Immediate Priorities
 1. **Double-booking Prevention**: Implement to eliminate overlapping bookings and events
-2. **Django Countries Update**: Replace deprecated package before November 2025
+2. **Cross-Day Event Logic**: Refine schedule override behavior for events spanning midnight
+3. **Django Countries Update**: Replace deprecated package before November 2025
 
 ### Long-term Features
 1. **Automated Customer Notifications**: Leverage postponed event status
@@ -396,6 +404,46 @@ The application is configured for Heroku deployment with:
 7. **Customer Testimonials & Reviews**: Display feedback and ratings system
 8. **About Section w/ Contact Form**: For visitors and users to address general inquiries
 9. **Support Contact Form**: For visitors and users to reach technical support or address inquiries directly through the application.
+
+## Usage Instructions
+
+### For Assessors
+
+#### Test Accounts
+- **Admin User**: `Axoelote` / `[password provided separately]`
+- **Customer User**: `Patricia` / `[password provided separately]`
+
+#### Key Features to Test
+
+**As a Customer (patricia):**
+1. **Register/Login**: Test authentication system
+2. **View Schedule**: See today's food truck location on homepage
+3. **Submit Booking**: Create and submit a catering request (70+ guests, 72hr advance notice)
+
+**As an Admin (axoelote):**
+1. **Admin Panel**: Access Django admin at `/admin/`
+2. **Manage Events**: Create, Edit or Delete events that override regular schedule
+3. **Manage Bookings**: Approve/reject customer requests
+4. **Update Schedule**: Modify regular operating hours and see them reflected on "where to find me" section
+
+#### Testing the Business Logic
+- **Schedule Priority**: Events override regular schedule display
+- **Validation**: Try booking with <70 guests or <72hr advance notice
+- **Multi-day Events**: Create events spanning multiple days
+
+### For Users
+
+#### Customer Workflow
+1. Register for an account
+2. Check today's location on homepage
+3. Submit catering requests through the booking form 
+
+
+#### Admin Workflow
+1. Login to admin panel
+2. Create events to override schedule
+3. Review and respond to booking requests
+4. Update regular schedule as needed
 
 ## Acknowledgements
 
