@@ -282,15 +282,17 @@ The application is configured for Heroku deployment with:
 2. **Calendar View**: Broader UX for schedule management
 3. **Dietary Restriction Management**: Structured dropdown selections
 4. **Advanced Reporting**: Analytics for booking patterns and revenue
-
-## Contact & Support
-
-For technical questions or business inquiries, contact the development team through the application's contact form or admin panel.
+5. **About Section w/ Contact Form**: For visitors and users to address general inquiries
+5. **Support Contact Form**: For visitors and users to reach technical support or address inquiries directly through the application.
 
 ## Acknowledgements
 
 This project was heavily inspired and informed by the **Code Institute’s Codestar Blog Project**.  
 The structure, best practices, and overall workflow provided wonderful insights that gave me a lot of knowledge and motivation for building this application.  
+The **logo** and **food truck business concept** used in this project is the property of Axoelote. 
 
-A huge thanks to Code Institute for their excellent learning materials and for sparking the ideas that shaped this project.  
+A huge thanks to Code Institute for their excellent learning materials and for sparking the ideas that shaped this project. 
+
+Special thanks to **Axoelote** for inspiring this project and for being my first **business customer case**, which marked an important milestone in my development journey. 
+
 I’m excited to continue learning and can’t wait to start working on **Version 2** with even more features and refinements.  
