@@ -37,7 +37,7 @@ def index(request):
     today = timezone.now().date()
     schedule_data = []
 
-    for i in range(7):  # Today + next 6 days
+    for i in range(9):  # Today + next days
         date = today + timedelta(days=i)
         schedule_item, schedule_type = get_schedule_for_date(date)
         schedule_data.append({
