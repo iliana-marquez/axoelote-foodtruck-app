@@ -7,7 +7,58 @@
     <section id="header" class="container">Make a booking</section>
 
     <!-- Current Schedule -->
-    <section id="schedule" class="container">Where you'll find me</section>
+    <section id="schedule" class="container my-5">
+      <div class="row text-center mb-4">
+        <div class="col">
+          <h2 class="fw-bold">Where you'll find me</h2>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        {% for day in schedule_data %}
+          <div class="col-12 col-sm-6 col-lg-4">
+            <div class="p-3 border rounded h-100 text-center">
+              <h5 class="mb-3">
+                {{ day.date|date:"l, M d" }}
+                {% if day.is_today %}
+                  <span class="ms-2">(Today)</span>
+                {% endif %}
+              </h5>
+
+              <!-- Image display -->
+              {% if day.type == 'event' or day.type == 'booking' %}
+                {% if day.item.event_photo %}
+                  <img src="{{ day.item.event_photo.url }}" alt="Event photo" class="img-fluid mb-3 rounded" style="max-height: 200px;">
+                {% else %}
+                  <img src="https://res.cloudinary.com/dj2lk9daf/image/upload/v1757924497/axoelote-on-the-move_f2flat.png" alt="Axolotl on the move" class="img-fluid mb-3 rounded" style="max-height: 150px;">
+                {% endif %}
+              {% elif day.type == 'regular' %}
+                <img src="https://res.cloudinary.com/dj2lk9daf/image/upload/v1757924698/naschmarkt-regular-location_xgxldl.png" alt="Naschmarkt location" class="img-fluid mb-3 rounded" style="max-height: 150px;">
+              {% elif day.type == 'closed' %}
+                <img src="https://res.cloudinary.com/dj2lk9daf/image/upload/v1757924497/closed_djft4q.png" alt="Naschmarkt location" class="img-fluid mb-3 rounded" style="max-height: 150px;">
+              {% endif %}
+
+              {% if day.type == 'event' and day.item.event_type == 'open' %}
+                <p class="fw-semibold">{{ day.item.event_title }}</p>
+                <p class="mb-1">{{ day.item.street_address }}</p>
+                <p>{{ day.item.town_or_city }}</p>
+
+              {% elif day.type == 'regular' %}
+                <p class="fw-semibold">{{ day.item.venue_name }}</p>
+                <p class="mb-1">{{ day.item.opening_time }} - {{ day.item.closing_time }}</p>
+                <p>{{ day.item.street_address }}, {{ day.item.town_or_city }}</p>
+
+              {% elif day.type == 'closed' %}
+                <p><em>Closed</em></p>
+
+              {% else %}
+                <p><em>Private Event</em></p>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
 
     <!-- Menu Section -->
     <section id="menu" class="container">Menu</section>
