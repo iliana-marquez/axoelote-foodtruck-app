@@ -18,6 +18,13 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
   - [Backend](#backend)
   - [Frontend](#frontend)
   - [Deployment](#deployment)
+- [Database Schema (ERD)](#database-schema-erd)
+    - [Model Realationships](#model-relationships)
+    - [BookingRequest Table](#bookingrequest-table)
+    - [Event Table](#event-table)
+    - [RegularSchedule Table](#regularschedule-table)
+    - [Key Design Decisions](#key-design-decisions)
+    - [Business Logic Implementation](#business-logic-implementation)
 - [Application Architecture](#application-architecture)
   - [App Structure](#app-structure)
   - [Data Models](#data-models)
@@ -88,6 +95,97 @@ As a **visitor**, I want:
 - **Heroku**: Cloud platform hosting
 - **WhiteNoise**: Static file serving
 - **Environment Variables**: Secure configuration management
+
+## Database Schema (ERD)
+
+### Model Relationships
+
+| Relationship | Type | Description |
+|--------------|------|-------------|
+| User → BookingRequest | One-to-Many | Customers can create multiple booking requests |
+| User → Event | One-to-Many | Admin users can manage multiple events |
+| RegularSchedule | Singleton | Independent fallback schedule (one active record) |
+
+## BookingRequest Table
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| id | AutoField | Primary Key | Auto-incrementing ID |
+| customer | ForeignKey(User) | CASCADE, required | Links to customer who made request |
+| event_title | CharField(100) | required | Name of the event |
+| event_type | CharField(20) | choices: open, private | Type of event requested |
+| guest_count | PositiveIntegerField | min_value=70 | Number of guests (business rule) |
+| start_datetime | DateTimeField | required | Event start time |
+| end_datetime | DateTimeField | required | Event end time |
+| description | TextField | optional | Event details (required for open events) |
+| message | TextField | optional | Special requests, dietary restrictions |
+| status | CharField(20) | choices: pending, approved, rejected | Request status |
+| street_address | CharField(80) | required | Event location address |
+| postcode | CharField(20) | required | Postal code |
+| town_or_city | CharField(40) | optional | City name |
+| country | CountryField | optional | Country selection |
+| event_photo | CloudinaryField | optional | Event inspiration photo |
+| created_at | DateTimeField | auto_now_add | Record creation timestamp |
+| updated_at | DateTimeField | auto_now | Last modification timestamp |
+
+## Event Table
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| id | AutoField | Primary Key | Auto-incrementing ID |
+| admin | ForeignKey(User) | PROTECT, required | Admin who created the event |
+| event_title | CharField(100) | required | Event name |
+| event_type | CharField(20) | choices: open, private, closure | Event type |
+| start_datetime | DateTimeField | required | Event start time |
+| end_datetime | DateTimeField | required | Event end time |
+| street_address | CharField(80) | optional for closures | Event location |
+| postcode | CharField(20) | optional | Postal code |
+| town_or_city | CharField(40) | optional | City name |
+| country | CountryField | optional | Country selection |
+| description | TextField | required | Event description |
+| message | TextField | optional | Internal admin notes |
+| status | CharField(20) | choices: active, postponed, cancelled | Event status |
+| event_photo | CloudinaryField | optional | Event photo |
+| created_at | DateTimeField | auto_now_add | Record creation timestamp |
+| updated_at | DateTimeField | auto_now | Last modification timestamp |
+
+## RegularSchedule Table
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| id | AutoField | Primary Key | Auto-incrementing ID |
+| venue_name | CharField(100) | required | Location name (e.g., 'Naschmarkt') |
+| street_address | CharField(80) | required | Venue address |
+| postcode | CharField(20) | optional | Postal code |
+| town_or_city | CharField(40) | required | City name |
+| country | CountryField | optional | Country selection |
+| monday | BooleanField | default=False | Open on Monday |
+| tuesday | BooleanField | default=True | Open on Tuesday |
+| wednesday | BooleanField | default=True | Open on Wednesday |
+| thursday | BooleanField | default=True | Open on Thursday |
+| friday | BooleanField | default=True | Open on Friday |
+| saturday | BooleanField | default=True | Open on Saturday |
+| sunday | BooleanField | default=False | Open on Sunday |
+| opening_time | TimeField | required | Daily opening time |
+| closing_time | TimeField | required | Daily closing time |
+| is_active | BooleanField | default=True | Schedule active status |
+| updated_at | DateTimeField | auto_now | Last modification timestamp |
+
+### Key Design Decisions
+
+- **BookingRequest.customer**: ForeignKey with CASCADE deletion (if user deleted, their bookings are removed)
+- **Event.admin**: ForeignKey with PROTECT deletion (prevents accidental admin deletion if they have events)
+- **RegularSchedule**: Independent model for default schedule fallback
+- **CloudinaryField**: Used for image storage in both BookingRequest and Event models
+- **CountryField**: Standardized country selection across all location-based models
+
+### Business Logic Implementation
+
+1. **Schedule Priority**: Events override RegularSchedule for display
+2. **Validation**: 70+ guest minimum enforced at model level
+3. **Status Tracking**: Both BookingRequest and Event models include status management
+4. **Audit Trail**: created_at/updated_at timestamps on all user-generated content
+
 
 ## Application Architecture
 
