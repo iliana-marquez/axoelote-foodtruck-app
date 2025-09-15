@@ -91,6 +91,11 @@ As a **visitor**, I want:
 - **Crispy Forms**: Enhanced form rendering
 - **Summernote**: Rich text editing for descriptions
 
+### Development Tools
+- **Visual Studio Code**: Primary code editor and IDE
+- **Git**: Version control system
+- **GitHub**: Repository hosting and project management 
+
 ### Deployment
 - **Heroku**: Cloud platform hosting
 - **WhiteNoise**: Static file serving
