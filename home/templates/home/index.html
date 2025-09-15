@@ -4,7 +4,18 @@
 <!-- index.html content starts here -->
 
     <!-- Booking CTA -->
-    <section id="header" class="container">Make a booking</section>
+    <section id="booking-cta" class="container border rounded text-center my-5 bg-danger-subtle p-5">
+      <img src="https://res.cloudinary.com/dj2lk9daf/image/upload/v1757925276/axoelote-logo_pb6fgg.png" 
+           alt="Axoelote Logo" 
+           class="img-fluid mb-3" 
+           style="max-width: 200px;">
+
+      <h2 class="fw-bold mb-3">Take me to your event!</h2>
+
+      <a href="{% url 'booking_request' %}" class="rounded-pill btn btn-white btn-dark border-danger-subtle btn-lg px-5">
+        Make a Booking
+      </a>
+    </section>
 
     <!-- Current Schedule -->
     <section id="schedule" class="container my-5">
@@ -16,7 +27,7 @@
 
       <div class="row g-4">
         {% for day in schedule_data %}
-          <div class="col-12 col-sm-6 col-lg-4">
+          <div class="col-12 col-sm-4">
             <div class="p-3 border rounded h-100 text-center">
               <h5 class="mb-3">
                 {{ day.date|date:"l, M d" }}
@@ -61,7 +72,11 @@
     </section>
 
     <!-- Menu Section -->
-    <section id="menu" class="container">Menu</section>
+    <section id="menu" class="container mt-5 text-center">
+      <img src="https://res.cloudinary.com/dj2lk9daf/image/upload/v1757925130/menu_yppadt.png" 
+           alt="Menu background" 
+           class="img-fluid rounded">
+    </section>
 
 <!-- index.html content ends here -->
 {% endblock %}
