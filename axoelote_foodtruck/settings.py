@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'django_countries',
     'home',
     'booking',
+    'events',
 ]
 
 SITE_ID = 1
