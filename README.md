@@ -390,8 +390,11 @@ The application is configured for Heroku deployment with:
 2. **Calendar View**: Broader UX for schedule management
 3. **Dietary Restriction Management**: Structured dropdown selections
 4. **Advanced Reporting**: Analytics for booking patterns and revenue
-5. **About Section w/ Contact Form**: For visitors and users to address general inquiries
-5. **Support Contact Form**: For visitors and users to reach technical support or address inquiries directly through the application.
+5. **Menu Display & Management**: Showcase food offerings with pricing and availability
+6. **Social Media Integration**: Connect Instagram/Facebook feeds and sharing capabilities
+7. **Customer Testimonials & Reviews**: Display feedback and ratings system
+8. **About Section w/ Contact Form**: For visitors and users to address general inquiries
+9. **Support Contact Form**: For visitors and users to reach technical support or address inquiries directly through the application.
 
 ## Acknowledgements
 
