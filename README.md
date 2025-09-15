@@ -42,6 +42,11 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
 - [Future Enhancements](#future-enhancements)
 - [Contact & Support](#contact--support)
 - [Acknowledgements](#acknowledgements)
+- [Key Takeaways](#acknowledgements)
+    - [Planning vs. Agility Balance](#planning-vs-agility-balance)
+    - [The Value of Initial Architecture](#the-value-of-initial-architecture)
+    - [Flexible Design Principles](#flexible-design-principles)
+    - [Development Velocity](#development-velocity)
 
 ## Project Overview
 
@@ -399,3 +404,18 @@ A huge thanks to Code Institute for their excellent learning materials and for s
 Special thanks to **Axoelote** for inspiring this project and for being my first **business customer case**, which marked an important milestone in my development journey. 
 
 I’m excited to continue learning and can’t wait to start working on **Version 2** with even more features and refinements.  
+
+
+## Key Takeaways
+
+### Planning vs. Agility Balance
+I spent considerable time upfront planning, writing detailed user stories, and preparing the project board. However, during development, things changed quickly and pivots happened organically - which somewhat diminished the value of extensive pre-planning. A middle ground between thorough planning and documenting-as-you-go might be more efficient for future projects.
+
+### The Value of Initial Architecture
+Despite the planning overhead, the upfront work paid dividends during development. Almost no major setbacks occurred - just a couple of URL wiring issues in the booking app, which were quickly resolved. This suggests that architectural planning, even if not followed exactly, provides a solid foundation.
+
+### Flexible Design Principles
+Being adaptable and understanding the core business purposes enabled building robust models that could evolve naturally. Even pivot decisions were made with long-term growth in mind, always trying to keep the database as flexible as possible. This approach reduces stress when implementing changes in production environments.
+
+### Development Velocity
+The combination of solid planning and flexible execution were key on the delivery of a production-ready MVP, which demonstrates that good architecture enables rapid feature development and deployment.
