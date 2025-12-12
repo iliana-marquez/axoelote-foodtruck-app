@@ -38,6 +38,7 @@ class BookingRequest(models.Model):
     country = CountryField(blank_label="Select country", null=True, blank=True)  
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
     event_photo = CloudinaryField('image', blank=True, null=True)
 
     def __str__(self):
