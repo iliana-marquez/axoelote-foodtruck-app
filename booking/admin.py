@@ -2,6 +2,7 @@ from django.contrib import admin
 from django_summernote.admin import SummernoteModelAdmin
 from .models import BookingRequest
 
+
 # Register your models here.
 @admin.register(BookingRequest)
 class BookingRequestAdmin(SummernoteModelAdmin):

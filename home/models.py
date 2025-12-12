@@ -10,7 +10,7 @@ class RegularSchedule(models.Model):
     town_or_city = models.CharField(max_length=40)
     country = CountryField(blank_label="Select country", null=True, blank=True)
 
-    # Days as individual boolean fields 
+    # Days as individual boolean fields
     monday = models.BooleanField(default=False)
     tuesday = models.BooleanField(default=True)
     wednesday = models.BooleanField(default=True)
@@ -28,6 +28,7 @@ class RegularSchedule(models.Model):
     def is_open_on_day(self, day_name):
         """Check if open on specific day"""
         return getattr(self, day_name.lower(), False)
+
 
 def __str__(self):
     # Get list of active days

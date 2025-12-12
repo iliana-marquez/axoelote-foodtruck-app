@@ -11,7 +11,7 @@ class BookingRequestForm(forms.ModelForm):
         fields = [
             'event_title', 'event_type', 'guest_count',
             'start_datetime', 'end_datetime', 'description',
-            'message', 'street_address', 'postcode', 
+            'message', 'street_address', 'postcode',
             'town_or_city', 'country', 'event_photo'
         ]
         widgets = {
@@ -36,7 +36,7 @@ class BookingRequestForm(forms.ModelForm):
             min_booking_time = timezone.now() + timedelta(hours=72)
             if start < min_booking_time:
                 raise forms.ValidationError("Events must be booked at least 72 hours (3 days) in advance.")
-        
+
         if start and end and end <= start:
             raise forms.ValidationError("End time must be after start time.")
 
