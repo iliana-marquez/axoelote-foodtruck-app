@@ -5,7 +5,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django import forms
 from .forms import BookingRequestForm, check_time_conflicts
-from .models import BookingRequest
+from .models import Booking
 from events.models import Event
 
 
@@ -225,7 +225,7 @@ class CheckTimeConflictsTest(TestCase):
         if end_hour < start_hour:
             end += timedelta(days=1)
 
-        return BookingRequest.objects.create(
+        return Booking.objects.create(
             customer=self.user,
             event_title='Test Booking',
             event_type='private',

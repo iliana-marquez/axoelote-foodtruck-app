@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.utils import timezone
 from datetime import timedelta
-from booking.models import BookingRequest
+from booking.models import Booking
 from events.models import Event
 from .models import RegularSchedule
 
@@ -18,7 +18,7 @@ def get_schedule_for_date(target_date):
         return events.first(), 'event'
 
     # Priority 2: Approved bookings
-    approved_bookings = BookingRequest.objects.filter(
+    approved_bookings = Booking.objects.filter(
         start_datetime__date__lte=target_date,
         end_datetime__date__gte=target_date,
         status='approved'

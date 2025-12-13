@@ -1,7 +1,7 @@
 from django.utils import timezone
 from datetime import timedelta
 from django import forms
-from .models import BookingRequest
+from .models import Booking
 from events.models import Event
 
 
@@ -14,7 +14,7 @@ def check_time_conflicts(
         exclude_booking_id=None
         ):
     """
-    Check for conflicts with existing BookingRequests and Events.
+    Check for conflicts with existing Bookings and Events.
     Requires a minimum hour gap between events.
     Handles conflict scenarios with actionable suggestions.
     Returns error message if conflicts found, None otherwise.
@@ -24,8 +24,8 @@ def check_time_conflicts(
     # collect all events to check for start/end times conflicts
     all_events = []
 
-    # check BookingRequests
-    bookings = BookingRequest.objects.filter(
+    # check Bookings
+    bookings = Booking.objects.filter(
         status__in=[
             'pending',
             'approved'
@@ -142,7 +142,7 @@ class BookingRequestForm(forms.ModelForm):
     Form for creating new booking requests
     """
     class Meta:
-        model = BookingRequest
+        model = Booking
         fields = [
             'event_title', 'event_type', 'guest_count',
             'start_datetime', 'end_datetime', 'description',

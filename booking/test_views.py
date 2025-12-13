@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.utils import timezone
 from datetime import timedelta
-from .models import BookingRequest
+from .models import Booking
 from .forms import BookingRequestForm
 
 
@@ -22,8 +22,8 @@ class BookingRequestViewTest(TestCase):
             'event_title': 'Wedding Reception',
             'event_type': 'private',
             'guest_count': 75,
-            'start_datetime': (timezone.now() + timedelta(days=5)).strftime('%Y-%m-%dT%H:%M'),
-            'end_datetime': (timezone.now() + timedelta(days=5, hours=5)).strftime('%Y-%m-%dT%H:%M'),
+            'start_datetime': (timezone.now() + timedelta(days=20)).strftime('%Y-%m-%dT%H:%M'),
+            'end_datetime': (timezone.now() + timedelta(days=20, hours=5)).strftime('%Y-%m-%dT%H:%M'),
             'description': '',
             'message': 'Vegetarian options needed',
             'street_address': '123 Main St',
@@ -60,8 +60,8 @@ class BookingRequestViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
         # Check booking was created
-        self.assertEqual(BookingRequest.objects.count(), 1)
-        booking = BookingRequest.objects.first()
+        self.assertEqual(Booking.objects.count(), 1)
+        booking = Booking.objects.first()
         self.assertEqual(booking.customer, self.user)
         self.assertEqual(booking.event_title, 'Wedding Reception')
         self.assertEqual(booking.status, 'pending')
@@ -85,37 +85,37 @@ class BookingRequestViewTest(TestCase):
         self.assertContains(response, 'greater than or equal to 70')
 
         # No booking should be created
-        self.assertEqual(BookingRequest.objects.count(), 0)
+        self.assertEqual(Booking.objects.count(), 0)
 
         # Check error message
         messages = list(get_messages(response.wsgi_request))
         self.assertTrue(any('correct the errors' in str(msg) for msg in messages))
 
-    def test_booking_request_post_72_hour_validation(self):
+    def test_booking_request_post_15_day_validation(self):
         """Test 72-hour advance booking validation in view"""
         self.client.login(username='testuser', password='testpass123')
 
         invalid_data = self.valid_booking_data.copy()
-        # Set start time to only 24 hours in advance
-        invalid_data['start_datetime'] = (timezone.now() + timedelta(hours=24)).strftime('%Y-%m-%dT%H:%M')
-        invalid_data['end_datetime'] = (timezone.now() + timedelta(hours=29)).strftime('%Y-%m-%dT%H:%M')
+        # Set start time to only 10 days in advance
+        invalid_data['start_datetime'] = (timezone.now() + timedelta(days=10)).strftime('%Y-%m-%dT%H:%M')
+        invalid_data['end_datetime'] = (timezone.now() + timedelta(days=10, hours=5)).strftime('%Y-%m-%dT%H:%M')
 
         response = self.client.post('/booking/request/', invalid_data)
 
         # Should return form with validation error
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, '72 hours')
+        self.assertContains(response, '15 days')
 
         # No booking should be created
-        self.assertEqual(BookingRequest.objects.count(), 0)
+        self.assertEqual(Booking.objects.count(), 0)
 
     def test_booking_request_post_time_order_validation(self):
         """Test end time after start time validation"""
         self.client.login(username='testuser', password='testpass123')
 
         invalid_data = self.valid_booking_data.copy()
-        start_time = timezone.now() + timedelta(days=5)
-        end_time = timezone.now() + timedelta(days=4)  # Before start time
+        start_time = timezone.now() + timedelta(days=20)
+        end_time = timezone.now() + timedelta(days=19)  # Before start time
 
         invalid_data['start_datetime'] = start_time.strftime('%Y-%m-%dT%H:%M')
         invalid_data['end_datetime'] = end_time.strftime('%Y-%m-%dT%H:%M')
@@ -127,7 +127,7 @@ class BookingRequestViewTest(TestCase):
         self.assertContains(response, 'End time must be after start time')
 
         # No booking should be created
-        self.assertEqual(BookingRequest.objects.count(), 0)
+        self.assertEqual(Booking.objects.count(), 0)
 
     def test_booking_request_post_open_event_description_required(self):
         """Test that open events require description"""
@@ -144,7 +144,7 @@ class BookingRequestViewTest(TestCase):
         self.assertContains(response, 'Description is required for open events')
 
         # No booking should be created
-        self.assertEqual(BookingRequest.objects.count(), 0)
+        self.assertEqual(Booking.objects.count(), 0)
 
     def test_booking_request_post_unauthenticated(self):
         """Test that unauthenticated users cannot submit bookings"""
@@ -155,7 +155,7 @@ class BookingRequestViewTest(TestCase):
         self.assertIn('/accounts/login/', response.url)
 
         # No booking should be created
-        self.assertEqual(BookingRequest.objects.count(), 0)
+        self.assertEqual(Booking.objects.count(), 0)
 
     def test_form_initial_state(self):
         """Test that form is properly initialized in GET request"""
@@ -181,8 +181,8 @@ class BookingRequestViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
         # Check booking was created
-        self.assertEqual(BookingRequest.objects.count(), 1)
-        booking = BookingRequest.objects.first()
+        self.assertEqual(Booking.objects.count(), 1)
+        booking = Booking.objects.first()
 
         if booking:
             self.assertEqual(booking.event_title, 'Wedding Reception')
