@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from cloudinary.models import CloudinaryField
 from django_countries.fields import CountryField
 from django.core.validators import MinValueValidator
+from .rules import MINIMUM_GUESTS
 
 
 EVENT_TYPES = [
@@ -30,7 +31,7 @@ class Booking(models.Model):
     event_title = models.CharField(max_length=100)
     event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
     guest_count = models.PositiveIntegerField(
-        validators=[MinValueValidator(70)]
+        validators=[MinValueValidator(MINIMUM_GUESTS)]
     )
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()

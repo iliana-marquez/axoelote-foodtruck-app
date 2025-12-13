@@ -44,12 +44,12 @@
                                 
                                 <div class="col-md-4 mb-3">
                                     {{ form.guest_count|as_crispy_field }}
-                                    <small class="form-text text-muted">Minimum 70 guests required</small>
+                                    <small class="form-text text-muted">Minimum {{ min_guests }} guests required</small>
                                 </div>
                                 
                                 <div class="col-md-4 mb-3">
                                     {{ form.start_datetime|as_crispy_field }}
-                                    <small class="form-text text-muted">Must be at least 72 hours in advance</small>
+                                    <small class="form-text text-muted">Must be at least {{ min_advance_days }} days in advance</small>
                                 </div>
                                 
                                 <div class="col-md-4 mb-3">
@@ -105,8 +105,8 @@
                             <div class="alert bg-danger-subtle mb-4">
                                 <h5 class="alert-heading">Important Information</h5>
                                 <ul class="mb-0">
-                                    <li>Minimum 70 guests required for all events</li>
-                                    <li>Bookings must be made at least 72 hours in advance</li>
+                                    <li>Minimum {{ min_guests }} guests required for all events</li>
+                                    <li>Bookings must be made at least {{ min_advance_days }} days in advance</li>
                                     <li>We'll respond to your request within 48 hours</li>
                                     <li>If no special dietary requirements are mentioned, our standard menu will apply</li>
                                 </ul>

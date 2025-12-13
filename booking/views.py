@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import BookingRequestForm
+from .rules import MINIMUM_ADVANCE_DAYS, MINIMUM_GUESTS
 
 
 @login_required(login_url='account_login')
@@ -29,4 +30,9 @@ def booking_request(request):
 
     return render(
         request, 'booking/booking_request.html',
-        {'form': form})
+        {
+            'form': form,
+            'min_advance_days': MINIMUM_ADVANCE_DAYS,
+            'min_guests': MINIMUM_GUESTS,
+        }
+    )

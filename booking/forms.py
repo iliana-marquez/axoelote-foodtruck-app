@@ -3,9 +3,7 @@ from datetime import timedelta
 from django import forms
 from .models import Booking
 from events.models import Event
-
-
-MINIMUM_GAP_HOURS = 10  # Adjustable for iteration after trial
+from .rules import MINIMUM_ADVANCE_DAYS, MINIMUM_GAP_HOURS
 
 
 def check_time_conflicts(
@@ -182,12 +180,12 @@ class BookingRequestForm(forms.ModelForm):
         event_type = cleaned_data.get('event_type')
         description = cleaned_data.get('description')
 
-        # 15 day advance booking rule for new bookings
+        # Time advance booking rule for new bookings
         if start:
-            min_booking_time = timezone.now() + timedelta(days=15)
+            min_booking_time = timezone.now() + timedelta(days=MINIMUM_ADVANCE_DAYS)
             if start < min_booking_time:
                 raise forms.ValidationError(
-                    "Events must be booked at least 15 days in advance."
+                    f"Events must be booked at least {MINIMUM_ADVANCE_DAYS} days in advance."
                     )
 
         # validate inputs
