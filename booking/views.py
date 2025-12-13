@@ -1,7 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import datetime, timedelta
 from .forms import BookingRequestForm
+from .slots import get_available_slots, format_slots_for_display
 from .rules import MINIMUM_ADVANCE_DAYS, MINIMUM_GUESTS
 
 
@@ -36,3 +40,37 @@ def booking_request(request):
             'min_guests': MINIMUM_GUESTS,
         }
     )
+
+
+@login_required(login_url='account_login')
+def get_slots_for_date(request, date_str):
+    """
+    API endpoint to get available slots for a specific date.
+    Returns JSON with available time slots.
+    """
+    try:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid date format. Use YYYY-MM-DD.'
+        }, status=400)
+
+    # check if date is far enough in advance
+    min_date = (timezone.now() + timedelta(days=MINIMUM_ADVANCE_DAYS)).date()
+    if target_date < min_date:
+        return JsonResponse({
+            'success': False,
+            'error': f"Date must be at least {
+                MINIMUM_ADVANCE_DAYS} days in advance."
+        }, status=400)
+
+    slots = get_available_slots(target_date)
+    formatted_slots = format_slots_for_display(slots)
+
+    return JsonResponse({
+        'success': True,
+        'date': date_str,
+        'slots': formatted_slots,
+        'has_availability': len(formatted_slots) > 0 
+    })
