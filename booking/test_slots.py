@@ -1,4 +1,3 @@
-# booking/test_slots.py
 """
 Automated tests for slots.py
 Run with: python manage.py test booking.test_slots -v 2
