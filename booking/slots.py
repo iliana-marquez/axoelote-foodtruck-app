@@ -263,8 +263,8 @@ def check_slot_available(
         booking = Booking.objects.filter(
             pk=exclude_booking_id
         ).values_list(
-            start_datetime,
-            end_datetime
+            'start_datetime',
+            'end_datetime'
         ).first()
         if booking:
             engagements = [
