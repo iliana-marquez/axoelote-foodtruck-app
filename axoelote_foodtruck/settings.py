@@ -141,11 +141,14 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Vienna'
 
 USE_I18N = True
 
 USE_TZ = True
+
+# Use custom formats, not locale defaults
+USE_L10N = False
 
 
 # Static files (CSS, JavaScript, Images)
