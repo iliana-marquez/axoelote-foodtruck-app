@@ -150,6 +150,26 @@ USE_TZ = True
 # Use custom formats, not locale defaults
 USE_L10N = False
 
+# DATE/TIME FORMATTING (European style)
+DATE_FORMAT = 'D d.m.Y'                    # Fri 30.01.2026
+DATETIME_FORMAT = 'D d.m.Y H:i'            # Fri 30.01.2026 18:00
+SHORT_DATE_FORMAT = 'd.m.Y'                # 30.01.2026
+SHORT_DATETIME_FORMAT = 'd.m.Y H:i'        # 30.01.2026 18:00
+TIME_FORMAT = 'H:i'                        # 18:00
+
+DATE_INPUT_FORMATS = [
+    '%d.%m.%Y',      # '30.01.2026' (primary)
+    '%Y-%m-%d',      # '2026-01-30' (ISO fallback)
+]
+DATETIME_INPUT_FORMATS = [
+    '%d.%m.%Y %H:%M',    # '30.01.2026 18:00'
+    '%Y-%m-%dT%H:%M',    # '2026-01-30T18:00' (HTML5)
+    '%Y-%m-%d %H:%M:%S', # '2026-01-30 18:00:00'
+]
+TIME_INPUT_FORMATS = [
+    '%H:%M',        # '18:00'
+    '%H:%M:%S',     # '18:00:00'
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
