@@ -1,156 +1,214 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load crispy_forms_tags %}
 
 {% block title %}Book Your Event - Axolotl Food Truck{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="{% static 'css/flatpickr_custom.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container">
+<div class="container py-4">
     {% if user.is_authenticated %}
-        <!-- Authenticated User: Show Booking Form -->
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-10">
-                <div class="card">
-                    <div class="card-header bg-danger-subtle text-center">
-                        <h2 class="mb-0">Book Your Event</h2>
-                        <p class="mb-0">Tell us about your event and we'll get back to you within 48 hours</p>
+            <div class="col-lg-10 col-md-12">
+                
+                <!-- Header -->
+                <div class="text-center mb-4">
+                    <h2>Book Your Event</h2>
+                </div>
+                
+                <!-- Form Errors -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
                     </div>
+                {% endif %}
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
                     
-                    <div class="card-body">
-                        <!-- Display form errors if any -->
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger" role="alert">
-                                {% for error in form.non_field_errors %}
-                                    <p class="mb-0">{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        
-                        <form method="post" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            
-                            <!-- Event Details Section -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h4 class="border-bottom pb-2 mb-3">Details</h4>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    {{ form.event_title|as_crispy_field }}
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    {{ form.event_type|as_crispy_field }}
-                                </div>
-                                
-                                <div class="col-md-4 mb-3">
-                                    {{ form.guest_count|as_crispy_field }}
-                                    <small class="form-text text-muted">Minimum {{ min_guests }} guests required</small>
-                                </div>
-                                
-                                <div class="col-md-4 mb-3">
-                                    {{ form.start_datetime|as_crispy_field }}
-                                    <small class="form-text text-muted">Must be at least {{ min_advance_days }} days in advance</small>
-                                </div>
-                                
-                                <div class="col-md-4 mb-3">
-                                    {{ form.end_datetime|as_crispy_field }}
-                                </div>
-                            </div>
-
-                            <!-- Location Section -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h4 class="border-bottom pb-2 mb-3">Event Location</h4>
-                                </div>
-                                
-                                <div class="col-12 mb-3">
-                                    {{ form.street_address|as_crispy_field }}
-                                </div>
-                                
-                                <div class="col-md-4 mb-3">
-                                    {{ form.postcode|as_crispy_field }}
-                                </div>
-                                
-                                <div class="col-md-4 mb-3">
-                                    {{ form.town_or_city|as_crispy_field }}
-                                </div>
-                                
-                                <div class="col-md-4 mb-3">
-                                    {{ form.country|as_crispy_field }}
-                                </div>
-                            </div>
-
-                            <!-- Event Description Section -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h4 class="border-bottom pb-2 mb-3">Event Information</h4>
-                                </div>
-                                
-                                <div class="col-12 mb-3">
-                                    {{ form.description|as_crispy_field }}
-                                    <small class="form-text text-muted">Required for open events. Describe the event for public display.</small>
-                                </div>
-                                
-                                <div class="col-12 mb-3">
-                                    {{ form.message|as_crispy_field }}
-                                </div>
-                                
-                                <div class="col-12 mb-3">
-                                    {{ form.event_photo|as_crispy_field }}
-                                    <small class="form-text text-muted">Optional: Upload a photo of your venue or event inspiration</small>
-                                </div>
-                            </div>
-
-                            <!-- Important Notice -->
-                            <div class="alert bg-danger-subtle mb-4">
-                                <h5 class="alert-heading">Important Information</h5>
-                                <ul class="mb-0">
-                                    <li>Minimum {{ min_guests }} guests required for all events</li>
-                                    <li>Bookings must be made at least {{ min_advance_days }} days in advance</li>
-                                    <li>We'll respond to your request within 48 hours</li>
-                                    <li>If no special dietary requirements are mentioned, our standard menu will apply</li>
-                                </ul>
-                            </div>
-
-                            <!-- Submit Button -->
+                    <!-- WHEN Section -->
+                    <div class="card booking-card mb-4">
+                        <div class="card-header bg-danger-subtle d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-calendar-event me-2"></i>When?</h5>
+                            <button type="button" class="btn btn-link text-decoration-none p-0" id="clear_when">
+                                Clear
+                            </button>
+                        </div>
+                        <div class="card-body">
                             <div class="row">
-                                <div class="col-12 text-center">
-                                    <button type="submit" class="rounded-pill btn btn-white btn-dark border-danger-subtle btn-lg px-5">
-                                        Submit Booking Request
-                                    </button>
-                                    <div class="mt-2">
-                                        <small class="text-muted">
-                                            By submitting this form, you agree to our terms and conditions
-                                        </small>
+                                <!-- Calendar -->
+                                <div class="col-md-7 mb-3 mb-md-0">
+                                    <div type="text" 
+                                        id="inline_calendar" 
+                                        data-mode="create"
+                                        data-min-advance-days="{{ min_advance_days }}"
+                                        class="d-none">
+                                    </div>
+                                    <small class="text-muted d-block mt-2">
+                                        <i class="bi bi-info-circle"></i>
+                                        Bookings must be at least {{ min_advance_days }} days in advance
+                                    </small>
+                                </div>
+                                
+                                <!-- Time Inputs -->
+                                <div class="col-md-5">
+                                    <div id="availability_status" class="mb-3 p-3 bg-light rounded">
+                                        <span class="text-muted">
+                                            <i class="bi bi-arrow-left-circle"></i>
+                                            Select a date to check availability
+                                        </span>
+                                    </div>
+                                    
+                                    <div id="time_fields" style="display: none;">
+                                        <div class="mb-3">
+                                            <label for="start_time" class="form-label">Start time</label>
+                                            <select id="start_time" class="form-select" required>
+                                                <option value="">Select start time</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="end_time" class="form-label">End time</label>
+                                            <select id="end_time" class="form-select" required>
+                                                <option value="">Select end time</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-check mb-3" id="next_day_wrapper" style="display: none;">
+                                            <input type="checkbox" class="form-check-input" id="ends_next_day">
+                                            <label class="form-check-label" for="ends_next_day">
+                                                Ends next day
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                            
+                            <!-- Summary -->
+                            <div id="booking_summary" class="alert mt-3 mb-0" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        <span id="summary_text"></span>
+                                    </span>
+                                    <strong id="duration_text"></strong>
+                                </div>
+                            </div>
+                            
+                            <!-- Error -->
+                            <div id="time_error" class="alert alert-danger mt-3 mb-0" style="display: none;"></div>
+                            
+                            <!-- Hidden Inputs -->
+                            <input type="hidden" id="id_start_datetime" name="start_datetime">
+                            <input type="hidden" id="id_end_datetime" name="end_datetime">
+                        </div>
                     </div>
-                </div>
+                    
+                    <!-- Details Section (hidden until time selected) -->
+                    <div id="details_section" style="display: none;">
+                        
+                        <!-- Event Info -->
+                        <div class="card booking-card mb-4">
+                            <div class="card-header bg-danger-subtle">
+                                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Event Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.event_title|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.event_type|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.guest_count|as_crispy_field }}
+                                        <small class="form-text text-muted">
+                                            Minimum {{ min_guests }} guests required
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3" id="description_field">
+                                    {{ form.description|as_crispy_field }}
+                                    <small class="form-text text-muted">Required for open events</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.message|as_crispy_field }}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.event_photo|as_crispy_field }}
+                                    <small class="form-text text-muted">Optional: Upload a photo of your venue</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="card booking-card mb-4">
+                            <div class="card-header bg-danger-subtle">
+                                <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Event Location</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        {{ form.street_address|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        {{ form.postcode|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        {{ form.town_or_city|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        {{ form.country|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notice -->
+                        <div class="alert bg-danger-subtle mb-4">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-exclamation-triangle me-2"></i>Important Information
+                            </h6>
+                            <ul class="mb-0 small">
+                                <li>Minimum {{ min_guests }} guests required for all events</li>
+                                <li>Bookings must be made at least {{ min_advance_days }} days in advance</li>
+                                <li>We'll respond to your request within 48 hours</li>
+                                <li>If no dietary requirements are mentioned, our standard menu applies</li>
+                            </ul>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-danger btn-lg px-5">
+                                <i class="bi bi-send me-2"></i>Submit Booking Request
+                            </button>
+                            <p class="text-muted small mt-2">
+                                By submitting, you agree to our terms and conditions
+                            </p>
+                        </div>
+                    </div>
+                </form>
             </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <h3>Please log in to make a booking</h3>
+            <a href="{% url 'account_login' %}" class="btn btn-danger mt-3">Log In</a>
         </div>
     {% endif %}
 </div>
+{% endblock %}
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Show/hide description field based on event type (open or private)
-    const eventTypeField = document.getElementById('id_event_type');
-    const descriptionField = document.querySelector('[for="id_description"]').closest('.mb-3');
-    
-    function toggleDescription() {
-        if (eventTypeField.value === 'open') {
-            descriptionField.style.display = 'block';
-        } else {
-            descriptionField.style.display = 'none';
-        }
-    }
-    
-    if (eventTypeField) {
-        eventTypeField.addEventListener('change', toggleDescription);
-        toggleDescription(); // Run on page load
-    }
-});
-</script>
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="{% static 'js/booking_form.js' %}"></script>
 {% endblock %}
