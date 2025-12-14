@@ -1,12 +1,43 @@
+from django import forms
 from django.contrib import admin
 from django.utils import timezone
 from django_summernote.admin import SummernoteModelAdmin
 from .models import Booking
+from .slots import check_slot_available
+
+
+class AdminBookingForm(forms.ModelForm):
+    """Admin form with booking validation."""
+
+    class Meta:
+        model = Booking
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        start = cleaned_data.get('start_datetime')
+        end = cleaned_data.get('end_datetime')
+
+        if start and end:
+            if end <= start:
+                raise forms.ValidationError(
+                    'End time must be after start time.')
+
+            error_message = check_slot_available(
+                start, end,
+                exclude_booking_id=self.instance.pk if self.instance else None
+            )
+            if error_message:
+                raise forms.ValidationError(error_message)
+
+        return cleaned_data
 
 
 # Register your models here.
 @admin.register(Booking)
 class BookingAdmin(SummernoteModelAdmin):
+    form = AdminBookingForm
     summernote_fields = ('description', 'message')
     list_display = [
         'customer',
