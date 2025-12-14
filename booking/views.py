@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import generic
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -109,3 +109,16 @@ class BookingList(LoginRequiredMixin, generic.ListView):
         context['past_count'] = bookings.filter(start_datetime__lt=today).count()
 
         return context
+
+
+@login_required(login_url='account_login')
+def booking_detail(request, pk):
+    """
+    Booking details page (read-only).
+    Shows full booking info.
+    """
+    booking = get_object_or_404(Booking, pk=pk, customer=request.user)
+
+    return render(request, 'booking/booking_detail.html', {
+        'booking': booking,
+    })
