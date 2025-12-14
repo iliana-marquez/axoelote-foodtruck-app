@@ -79,7 +79,7 @@
                                     {{ booking.get_status_display }}
                                 </span>
                             </td>
-                            <td class="text-end">
+                            <td class="text-end" onclick="event.stopPropagation()">
                                 {% if booking.status == 'pending' %}
                                 <a href="#" class="btn btn-sm me-1" title="Edit">
                                     <i class="bi bi-pencil"></i>
