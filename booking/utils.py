@@ -1,6 +1,8 @@
 """
 Utility functions for booking system.
-Reusable helpers for calculating and formating.
+Reusable helpers for handling, calculating and formating.
+1. Calculate duration between 2 datetimes (time formatting)
+2. Determine what a customer can edit based on days until event.
 """
 
 
@@ -35,3 +37,58 @@ def calculate_duration(start_dt, end_dt):
         'display': display,
         'display_compact': display_compact
     }
+
+
+def get_edit_permissions(booking):
+    """
+    Determine what a customer can edit based on days until event.
+
+    Returns:
+        dict: {
+            'can_edit': bool,
+            'edit_level': 'full' | 'cosmetic' | 'none',
+            'days_until': int,
+            'editable_fields': list,
+            'locked_fields': list,
+            'message': str
+        }
+    """
+    if booking.status == 'cancelled':
+        return {
+            'can_edit': False,
+            'edit_level': 'none',
+            'days_until': None,
+            'editable_fields': [],
+            'locked_fields': [],
+            'message': 'Cancelled bookings cannot be edited. Please create a new booking.'
+        }
+
+    days_until = (booking.start_datetime.date() - timezone.now().date()).days
+
+    if days_until >= FULL_EDIT_DAYS:
+        return {
+            'can_edit': True,
+            'edit_level': 'full',
+            'days_until': days_until,
+            'editable_fields': COSMETIC_FIELDS + LOCKED_FIELDS,
+            'locked_fields': [],
+            'message': 'You can edit all booking details.'
+        }
+    elif days_until >= COSMETIC_EDIT_DAYS:
+        return {
+            'can_edit': True,
+            'edit_level': 'cosmetic',
+            'days_until': days_until,
+            'editable_fields': COSMETIC_FIELDS,
+            'locked_fields': LOCKED_FIELDS,
+            'message': f'Your event is in {days_until} days. Only title, description, and photo can be changed.'
+        }
+    else:
+        return {
+            'can_edit': False,
+            'edit_level': 'none',
+            'days_until': days_until,
+            'editable_fields': [],
+            'locked_fields': [],
+            'message': f'Your event is in {days_until} days. Please contact us for urgent changes.'
+        }
