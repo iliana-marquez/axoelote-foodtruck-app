@@ -332,6 +332,12 @@ end_datetime__date__gte=target_date
 - Proper CloudinaryField import consistency across models
 - Successful file upload testing in production environment
 
+## Bug Fixes:
+### Row Click vs Button Click Bug
+**Issue:** Clickable table rows captured button clicks, preventing Edit/Cancel actions.
+**Fix:** Add `onclick="event.stopPropagation()"` to actions `<td>` element.
+**Lesson:** When using row-level click handlers, always stop propagation on interactive child elements.
+
 ## Known Limitations
 
 ### Double-booking Prevention
