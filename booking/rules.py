@@ -19,3 +19,7 @@ LOCKED_FIELDS = [
     'street_address', 'town_or_city', 'postcode', 'country',
     'guest_count', 'event_type', 'message'
 ]
+
+# Contact information
+CONTACT_EMAIL = 'booking@axoelote.com'
+CONTACT_PHONE = '+43 123 456 78910'

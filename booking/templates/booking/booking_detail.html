@@ -12,7 +12,7 @@
                 <i class="bi bi-arrow-left me-1"></i> Back to My Bookings
             </a>
             
-            <!-- Header w/ Edit and Cancel Conditional Buttons -->
+            <!-- Header w/ Edit and Cancel Conditional Buttons/Messages -->
             <div class="d-flex justify-content-between align-items-start mb-4">
                 <div>
                     <h2>{{ booking.event_title }}</h2>
@@ -29,6 +29,36 @@
                     <button type="button" class="btn">
                         <i class="bi bi-x-lg me-1"></i> Cancel
                     </button>
+                </div>
+                {% endif %}
+
+                {% if not permissions.can_edit %}
+                <!-- Non-editable: Show contextual message -->
+                <div class="alert alert-{% if permissions.days_until is not None and permissions.days_until < 0 %}secondary{% else %}info{% endif %} mb-4">
+                    <div class="d-flex align-items-center">
+                        {% if permissions.days_until is not None and permissions.days_until < 0 %}
+                        <!-- Past event -->
+                        <i class="bi bi-clock-history me-2 fs-5"></i>
+                        <span>{{ permissions.message }}</span>
+                        {% elif booking.status == 'cancelled' %}
+                        <!-- Cancelled -->
+                        <i class="bi bi-x-circle me-2 fs-5"></i>
+                        <span>{{ permissions.message }}</span>
+                        {% else %}
+                        <!-- Upcoming but locked (0-2 days) -->
+                        <i class="bi bi-info-circle me-2 fs-5"></i>
+                        <div>
+                            <strong>{{ permissions.message }}</strong>
+                            <p class="mb-0 mt-1">
+                                <i class="bi bi-envelope me-1"></i> 
+                                <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+                                <span class="mx-2">|</span>
+                                <i class="bi bi-telephone me-1"></i> 
+                                {{ contact_phone }}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endif %}
             </div>

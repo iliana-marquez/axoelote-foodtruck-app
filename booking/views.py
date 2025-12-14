@@ -8,9 +8,14 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from .forms import BookingRequestForm
 from .slots import get_available_slots, format_slots_for_display
-from .rules import MINIMUM_ADVANCE_DAYS, MINIMUM_GUESTS
 from .models import Booking
 from .utils import get_edit_permissions
+from .rules import (
+    MINIMUM_ADVANCE_DAYS,
+    MINIMUM_GUESTS,
+    CONTACT_EMAIL,
+    CONTACT_PHONE
+    )
 
 
 @login_required(login_url='account_login')
@@ -124,7 +129,9 @@ def booking_detail(request, pk):
 
     return render(request, 'booking/booking_detail.html', {
         'booking': booking,
-        'permissions': permissions
+        'permissions': permissions,
+        'contact_email': CONTACT_EMAIL,
+        'contact_phone': CONTACT_PHONE
     })
 
 
