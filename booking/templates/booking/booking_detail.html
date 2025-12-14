@@ -1,150 +1,503 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ booking.event_title }} - Axolotl Food Truck{% endblock %}
+{% block title %}{{ booking.event_title }} - Axoelote Food Truck{% endblock %}
+
+{% block extra_css %}
+{% if permissions.edit_level == 'full' %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="{% static 'css/flatpickr_custom.css' %}">
+{% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10 col-md-12">
             
             <!-- Back Link -->
             <a href="{% url 'bookings' %}" class="text-decoration-none mb-3 d-inline-block">
                 <i class="bi bi-arrow-left me-1"></i> Back to My Bookings
             </a>
             
-            <!-- Header w/ Edit and Cancel Conditional Buttons/Messages -->
+            <!-- Header -->
             <div class="d-flex justify-content-between align-items-start mb-4">
                 <div>
                     <h2>{{ booking.event_title }}</h2>
+                    <!-- Status -->
                     <span class="badge bg-{% if booking.status == 'approved' %}success{% elif booking.status == 'pending' %}warning text-dark{% else %}secondary{% endif %} fs-6">
                         {{ booking.get_status_display }}
                     </span>
+                    <!-- Relevant timestamp -->
+                    <span class="text-muted small ms-2">
+                        {{ status_info.label }}: {{ status_info.timestamp|date:"d.m.Y" }}
+                    </span>
                 </div>
                 
-                {% if permissions.can_edit %}
-                <div>
-                    <a href="{% url 'booking_edit' booking.pk %}" class="btn me-2">
-                        <i class="bi bi-pencil me-1"></i> Edit
-                    </a>
-                    <button type="button" class="btn">
-                        <i class="bi bi-x-lg me-1"></i> Cancel
-                    </button>
-                </div>
-                {% endif %}
-
-                {% if not permissions.can_edit %}
-                <!-- Non-editable: Show contextual message -->
-                <div class="alert alert-{% if permissions.days_until is not None and permissions.days_until < 0 %}secondary{% else %}info{% endif %} mb-4">
-                    <div class="d-flex align-items-center">
-                        {% if permissions.days_until is not None and permissions.days_until < 0 %}
-                        <!-- Past event -->
-                        <i class="bi bi-clock-history me-2 fs-5"></i>
-                        <span>{{ permissions.message }}</span>
-                        {% elif booking.status == 'cancelled' %}
-                        <!-- Cancelled -->
-                        <i class="bi bi-x-circle me-2 fs-5"></i>
-                        <span>{{ permissions.message }}</span>
-                        {% else %}
-                        <!-- Upcoming but locked (0-2 days) -->
-                        <i class="bi bi-info-circle me-2 fs-5"></i>
-                        <div>
-                            <strong>{{ permissions.message }}</strong>
-                            <p class="mb-0 mt-1">
-                                <i class="bi bi-envelope me-1"></i> 
-                                <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
-                                <span class="mx-2">|</span>
-                                <i class="bi bi-telephone me-1"></i> 
-                                {{ contact_phone }}
-                            </p>
-                        </div>
-                        {% endif %}
-                    </div>
+                {% if not permissions.can_edit and permissions.days_until is not None and permissions.days_until >= 0 %}
+                <div class="text-end">
+                    <span class="text-muted small">{{ permissions.message }}</span>
                 </div>
                 {% endif %}
             </div>
+         
+            <!-- Messages -->
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show mb-4">
+                <i class="bi bi-{% if message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
             
-            <!-- Event Details Card -->
-            <div class="card mb-4">
-                <div class="card-header bg-danger-subtle">
-                    <h5 class="mb-0">Event Details</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="text-muted small">Date</div>
-                            <strong>{{ booking.start_datetime|date:"l, d F Y" }}</strong>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="text-muted small">Time</div>
-                            <strong>{{ booking.start_datetime|time:"H:i" }} - {{ booking.end_datetime|time:"H:i" }}</strong>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="text-muted small">Event Type</div>
-                            <strong>{{ booking.get_event_type_display }}</strong>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="text-muted small">Guest Count</div>
-                            <strong>{{ booking.guest_count }} guests</strong>
-                        </div>
-                    </div>
-                    
-                    {% if booking.description %}
-                    <div class="mt-3">
-                        <div class="text-muted small">Description</div>
-                        <p class="mb-0">{{ booking.description }}</p>
+            <!-- Non-editable message -->
+            {% if not permissions.can_edit %}
+            <div class="alert alert-{% if permissions.days_until is not None and permissions.days_until < 0 %}secondary{% else %}info{% endif %} mb-4">
+                <div class="d-flex align-items-center">
+                    {% if permissions.days_until is not None and permissions.days_until < 0 %}
+                    <i class="bi bi-clock-history me-2 fs-5"></i>
+                    <span>{{ permissions.message }}</span>
+                    {% elif booking.status == 'cancelled' %}
+                    <i class="bi bi-x-circle me-2 fs-5"></i>
+                    <span>{{ permissions.message }}</span>
+                    {% else %}
+                    <i class="bi bi-info-circle me-2 fs-5"></i>
+                    <div>
+                        <strong>{{ permissions.message }}</strong>
+                        <p class="mb-0 mt-1">
+                            <i class="bi bi-envelope me-1"></i> 
+                            <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+                            <span class="mx-2">|</span>
+                            <i class="bi bi-telephone me-1"></i> 
+                            {{ contact_phone }}
+                        </p>
                     </div>
                     {% endif %}
                 </div>
             </div>
-            
-            <!-- Location Card -->
-            <div class="card mb-4">
-                <div class="card-header bg-danger-subtle">
-                    <h5 class="mb-0">Location</h5>
-                </div>
-                <div class="card-body">
-                    <address class="mb-0">
-                        {{ booking.street_address }}<br>
-                        {{ booking.postcode }} {{ booking.town_or_city }}<br>
-                        {{ booking.country.name }}
-                    </address>
-                </div>
-            </div>
-            
-            <!-- Message Card -->
-            {% if booking.message %}
-            <div class="card mb-4">
-                <div class="card-header bg-danger-subtle">
-                    <h5 class="mb-0">Your Message</h5>
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">{{ booking.message }}</p>
-                </div>
-            </div>
             {% endif %}
             
-            <!-- Booking Info Card -->
-            <div class="card">
-                <div class="card-header bg-danger-subtle">
-                    <h5 class="mb-0">Booking Information</h5>
+            <!-- Form for POST -->
+            <form method="POST" enctype="multipart/form-data" id="booking-form">
+                {% csrf_token %}
+                
+                <!-- Form errors -->
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger mb-4">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="text-muted small">Submitted</div>
-                            <strong>{{ booking.created_at|date:"d.m.Y H:i" }}</strong>
+                {% endif %}
+                
+                <!-- Date & Time Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-danger-subtle">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calendar-event me-2"></i>Date & Time
+                            {% if 'start_datetime' in permissions.locked_fields %}
+                            <i class="bi bi-lock text-muted ms-2" title="Locked"></i>
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if permissions.edit_level == 'full' %}
+                        
+                        <!-- Current booking summary -->
+                        <div id="current_datetime_display" class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                            <div>
+                                <i class="bi bi-calendar3 me-2 text-danger"></i>
+                                <strong id="display_date">{{ booking.start_datetime|date:"l, d F Y" }}</strong>
+                                <br>
+                                <i class="bi bi-clock me-2 text-muted"></i>
+                                <span id="display_time">{{ booking.start_datetime|time:"H:i" }} - {{ booking.end_datetime|time:"H:i" }}</span>
+                                <span id="display_duration" class="text-muted ms-2"></span>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="toggle_datetime_edit">
+                                <i class="bi bi-pencil me-1"></i> Change
+                            </button>
                         </div>
-                        {% if booking.approved_at %}
-                        <div class="col-md-6">
-                            <div class="text-muted small">Approved</div>
-                            <strong>{{ booking.approved_at|date:"d.m.Y H:i" }}</strong>
+                        
+                        <!-- Expandable edit section -->
+                        <div id="datetime_edit_section" class="mt-3 p-3 border rounded" style="display: none;">
+                            <div class="row">
+                                <!-- Calendar -->
+                                <div class="col-md-7 mb-3 mb-md-0">
+                                    <label class="form-label fw-bold">Select New Date</label>
+                                    <div id="inline_calendar"
+                                         data-mode="edit"
+                                         data-min-advance-days="{{ min_advance_days }}"
+                                         data-exclude-booking-id="{{ booking.pk }}"
+                                         data-preselected-date="{{ booking.start_datetime|date:'Y-m-d' }}"
+                                         data-preselected-start-time="{{ booking.start_datetime|time:'H:i' }}"
+                                         data-preselected-end-time="{{ booking.end_datetime|time:'H:i' }}">
+                                    </div>
+                                </div>
+
+                                <!-- Time Selection -->
+                                <div class="col-md-5">
+                                    <div id="availability_status" class="mb-3 p-2 bg-light rounded small">
+                                        <span class="text-muted">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Select a date to see available times
+                                        </span>
+                                    </div>
+
+                                    <div id="time_fields" style="display: none;">
+                                        <div class="mb-3">
+                                            <label for="start_time" class="form-label">Start time</label>
+                                            <select id="start_time" class="form-select">
+                                                <option value="">Select start time</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="end_time" class="form-label">End time</label>
+                                            <select id="end_time" class="form-select">
+                                                <option value="">Select end time</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-check mb-3" id="next_day_wrapper" style="display: none;">
+                                            <input type="checkbox" class="form-check-input" id="ends_next_day">
+                                            <label class="form-check-label" for="ends_next_day">
+                                                Ends next day
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- New Selection Preview -->
+                                    <div id="new_selection_preview" class="alert alert-success mb-3" style="display: none;">
+                                        <small class="text-muted d-block mb-1">New selection:</small>
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        <strong id="preview_date"></strong><br>
+                                        <span id="preview_time" class="ms-4"></span>
+                                        <span id="preview_duration" class="float-end"></span>
+                                    </div>
+                                    
+                                    <!-- Error -->
+                                    <div id="time_error" class="alert alert-danger mb-3" style="display: none;"></div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-success flex-grow-1" id="apply_datetime_change" disabled>
+                                            <i class="bi bi-check-lg me-1"></i> Apply
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" id="cancel_datetime_edit">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden fields -->
+                        <input type="hidden" name="start_datetime" id="id_start_datetime" 
+                               value="{{ booking.start_datetime|date:'Y-m-d' }}T{{ booking.start_datetime|time:'H:i' }}">
+                        <input type="hidden" name="end_datetime" id="id_end_datetime" 
+                               value="{{ booking.end_datetime|date:'Y-m-d' }}T{{ booking.end_datetime|time:'H:i' }}">
+
+                        {% else %}
+                        <!-- Read-only view -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="text-muted small">Date</div>
+                                <strong>{{ booking.start_datetime|date:"l, d F Y" }}</strong>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="text-muted small">Time</div>
+                                <strong>{{ booking.start_datetime|time:"H:i" }} - {{ booking.end_datetime|time:"H:i" }}</strong>
+                            </div>
                         </div>
                         {% endif %}
                     </div>
                 </div>
-            </div>
+                
+                <!-- Event Details Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-danger-subtle d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Event Details
+                        </h5>
+                        {% if permissions.can_edit %}
+                        <button type="button" class="btn btn-outline-primary btn-sm toggle-edit-btn" data-section="event">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <!-- Display Mode -->
+                        <div id="event_display" class="display-section">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="text-muted small">Event Title</div>
+                                    <strong>{{ booking.event_title }}</strong>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="text-muted small">Event Type</div>
+                                    <strong>{{ booking.get_event_type_display }}</strong>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="text-muted small">Guest Count</div>
+                                    <strong>{{ booking.guest_count }} guests</strong>
+                                </div>
+                            </div>
+                            {% if booking.description %}
+                            <div class="mt-2">
+                                <div class="text-muted small">Description</div>
+                                <p class="mb-0">{{ booking.description }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Edit Mode -->
+                        <div id="event_edit" class="edit-section" style="display: none;">
+                            <div class="mb-3">
+                                <label for="{{ form.event_title.id_for_label }}" class="form-label">Event Title</label>
+                                {{ form.event_title }}
+                                {% if form.event_title.errors %}
+                                <div class="text-danger small">{{ form.event_title.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {% if 'event_type' in permissions.locked_fields %}
+                                    <label class="form-label text-muted">
+                                        <i class="bi bi-lock me-1"></i> Event Type
+                                    </label>
+                                    <p class="form-control-plaintext">{{ booking.get_event_type_display }}</p>
+                                    {% else %}
+                                    <label for="{{ form.event_type.id_for_label }}" class="form-label">Event Type</label>
+                                    {{ form.event_type }}
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {% if 'guest_count' in permissions.locked_fields %}
+                                    <label class="form-label text-muted">
+                                        <i class="bi bi-lock me-1"></i> Guest Count
+                                    </label>
+                                    <p class="form-control-plaintext">{{ booking.guest_count }} guests</p>
+                                    {% else %}
+                                    <label for="{{ form.guest_count.id_for_label }}" class="form-label">Guest Count</label>
+                                    {{ form.guest_count }}
+                                    <div class="form-text">Minimum {{ min_guests }} guests</div>
+                                    {% if form.guest_count.errors %}
+                                    <div class="text-danger small">{{ form.guest_count.errors }}</div>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                                {{ form.description }}
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary toggle-cancel-btn" data-section="event">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Location Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-danger-subtle d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-geo-alt me-2"></i>Location
+                            {% if 'street_address' in permissions.locked_fields %}
+                            <i class="bi bi-lock text-muted ms-2" title="Locked"></i>
+                            {% endif %}
+                        </h5>
+                        {% if permissions.can_edit and 'street_address' not in permissions.locked_fields %}
+                        <button type="button" class="btn btn-outline-primary btn-sm toggle-edit-btn" data-section="location">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <!-- Display Mode -->
+                        <div id="location_display" class="display-section">
+                            <address class="mb-0">
+                                {{ booking.street_address }}<br>
+                                {{ booking.postcode }} {{ booking.town_or_city }}<br>
+                                {{ booking.country.name }}
+                            </address>
+                        </div>
+                        
+                        <!-- Edit Mode -->
+                        <div id="location_edit" class="edit-section" style="display: none;">
+                            <div class="mb-3">
+                                <label for="{{ form.street_address.id_for_label }}" class="form-label">Street Address</label>
+                                {{ form.street_address }}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.town_or_city.id_for_label }}" class="form-label">Town/City</label>
+                                    {{ form.town_or_city }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.postcode.id_for_label }}" class="form-label">Postcode</label>
+                                    {{ form.postcode }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.country.id_for_label }}" class="form-label">Country</label>
+                                {{ form.country }}
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary toggle-cancel-btn" data-section="location">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Info Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-danger-subtle d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-chat-text me-2"></i>Additional Information
+                        </h5>
+                        {% if permissions.can_edit %}
+                        <button type="button" class="btn btn-outline-primary btn-sm toggle-edit-btn" data-section="additional">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <!-- Display Mode -->
+                        <div id="additional_display" class="display-section">
+                            {% if booking.message %}
+                            <div class="mb-3">
+                                <div class="text-muted small">Message / Dietary Requirements</div>
+                                <p class="mb-0">{{ booking.message }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            {% if booking.event_photo %}
+                            <div>
+                                <div class="text-muted small">Event Photo</div>
+                                <img src="{{ booking.event_photo.url }}" alt="Event photo" class="img-thumbnail mt-1" style="max-height: 150px;">
+                            </div>
+                            {% endif %}
+                            
+                            {% if not booking.message and not booking.event_photo %}
+                            <p class="text-muted mb-0">No additional information provided.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Edit Mode -->
+                        <div id="additional_edit" class="edit-section" style="display: none;">
+                            <div class="mb-3">
+                                {% if 'message' in permissions.locked_fields %}
+                                <label class="form-label text-muted">
+                                    <i class="bi bi-lock me-1"></i> Message / Dietary Requirements
+                                </label>
+                                <p class="form-control-plaintext">{{ booking.message|default:"—" }}</p>
+                                {% else %}
+                                <label for="{{ form.message.id_for_label }}" class="form-label">Message / Dietary Requirements</label>
+                                {{ form.message }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.event_photo.id_for_label }}" class="form-label">Event Photo</label>
+                                {{ form.event_photo }}
+                                {% if booking.event_photo %}
+                                <div class="mt-2">
+                                    <small class="text-muted">Current:</small>
+                                    <img src="{{ booking.event_photo.url }}" alt="Current photo" class="img-thumbnail" style="max-height: 100px;">
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary toggle-cancel-btn" data-section="additional">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                     
+                <!-- Save Button (visible when editing) -->
+                {% if permissions.can_edit %}
+                <div id="save_section" class="d-flex justify-content-between mb-4" style="display: none;">
+                    <a href="{% url 'booking_detail' booking.pk %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x me-1"></i> Discard All Changes
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-check-lg me-1"></i> Save All Changes
+                    </button>
+                </div>
+                {% endif %}
+                
+                <!-- Cancel Booking Button -->
+                {% if permissions.can_edit and booking.status != 'cancelled' %}
+                <div class="text-center mt-4 pt-4 border-top">
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                        <i class="bi bi-x-circle me-1"></i> Cancel This Booking
+                    </button>
+                </div>
+                {% endif %}
+                
+            </form>
             
         </div>
     </div>
 </div>
+
+<!-- Cancel Modal -->
+{% if permissions.can_edit and booking.status != 'cancelled' %}
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Booking</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel <strong>{{ booking.event_title }}</strong>?</p>
+                <p class="text-muted">{{ booking.start_datetime|date:"D d.m.Y" }} at {{ booking.start_datetime|time:"H:i" }}</p>
+                
+                <div class="alert alert-warning">
+                    <strong>Cancellation Policy:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>15+ days before: 100% refund</li>
+                        <li>14-3 days before: Partial refund</li>
+                        <li>2-0 days before: No refund</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Booking</button>
+                <form action="#" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if permissions.can_edit %}
+{% if permissions.edit_level == 'full' %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{% endif %}
+<script src="{% static 'js/booking_detail.js' %}"></script>
+{% endif %}
 {% endblock %}
