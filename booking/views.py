@@ -10,6 +10,7 @@ from .forms import BookingRequestForm
 from .slots import get_available_slots, format_slots_for_display
 from .rules import MINIMUM_ADVANCE_DAYS, MINIMUM_GUESTS
 from .models import Booking
+from .utils import get_edit_permissions
 
 
 @login_required(login_url='account_login')
@@ -75,7 +76,7 @@ def get_slots_for_date(request, date_str):
         'success': True,
         'date': date_str,
         'slots': formatted_slots,
-        'has_availability': len(formatted_slots) > 0 
+        'has_availability': len(formatted_slots) > 0
     })
 
 
@@ -106,7 +107,8 @@ class BookingList(LoginRequiredMixin, generic.ListView):
         context['active_count'] = bookings.filter(
             status='approved', start_datetime__gte=today
         ).count()
-        context['past_count'] = bookings.filter(start_datetime__lt=today).count()
+        context['past_count'] = bookings.filter(
+            start_datetime__lt=today).count()
 
         return context
 
@@ -121,4 +123,59 @@ def booking_detail(request, pk):
 
     return render(request, 'booking/booking_detail.html', {
         'booking': booking,
+    })
+
+
+@login_required(login_url='account_login')
+def booking_edit(request, pk):
+    """
+    Edit a booking based on tiered permissions.
+
+    - 15+ days: Full edit
+    - 3-14 days: Cosmetic only (title, description, photo)
+    - 0-2 days: No edit, contact admin
+    """
+    booking = get_object_or_404(Booking, pk=pk, customer=request.user)
+    permissions = get_edit_permissions(booking)
+
+    # Check if editing is allowed
+    if not permissions['can_edit']:
+        messages.error(request, permissions['message'])
+        return redirect('booking_detail', pk=pk)
+
+    if request.method == 'POST':
+        if permissions['edit_level'] == 'full':
+            # Full edit - all fields
+            form = BookingRequestForm(
+                request.POST,
+                request.FILES,
+                instance=booking
+                )
+        else:
+            # Cosmetic edit - only allowed fields
+            form = BookingRequestForm(
+                request.POST,
+                request.FILES,
+                instance=booking
+                )
+            # Restore locked fields from original booking
+            for field in permissions['locked_fields']:
+                if field in form.fields:
+                    form.instance.__dict__[field] = getattr(booking, field)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Booking updated successfully!')
+            return redirect('booking_detail', pk=pk)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BookingRequestForm(instance=booking)
+
+    return render(request, 'booking/booking_edit.html', {
+        'form': form,
+        'booking': booking,
+        'permissions': permissions,
+        'min_advance_days': MINIMUM_ADVANCE_DAYS,
+        'min_guests': MINIMUM_GUESTS,
     })
