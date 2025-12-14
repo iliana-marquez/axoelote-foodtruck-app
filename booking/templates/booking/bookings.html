@@ -80,7 +80,7 @@
                                 </span>
                             </td>
                             <td class="text-end" onclick="event.stopPropagation()">
-                                {% if booking.status == 'pending' %}
+                                {% if permissions.can_edit %}
                                 <a href="{% url 'booking_edit' booking.pk %}" class="btn btn-sm me-1" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>

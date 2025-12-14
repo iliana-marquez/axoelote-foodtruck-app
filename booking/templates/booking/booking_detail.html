@@ -21,7 +21,7 @@
                     </span>
                 </div>
                 
-                {% if booking.status == 'pending' %}
+                {% if permissions.can_edit %}
                 <div>
                     <a href="{% url 'booking_edit' booking.pk %}" class="btn me-2">
                         <i class="bi bi-pencil me-1"></i> Edit
