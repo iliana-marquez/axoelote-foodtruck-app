@@ -120,9 +120,11 @@ def booking_detail(request, pk):
     Shows full booking info.
     """
     booking = get_object_or_404(Booking, pk=pk, customer=request.user)
+    permissions = get_edit_permissions(booking)
 
     return render(request, 'booking/booking_detail.html', {
         'booking': booking,
+        'permissions': permissions
     })
 
 
