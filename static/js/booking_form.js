@@ -1,10 +1,8 @@
 // =========================================
 //   BOOKING FORM JAVASCRIPT
 //   Configurable for Create and Edit modes
-//   IMPORTANT: Business rules come from data attributes set by Django.
+//   Business rules come from data attributes set by Django.
 // =========================================
-
-console.log('=== booking_form.js loaded ===');
 
 document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('inline_calendar');
@@ -34,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         bookingSummary: document.getElementById('booking_summary'),
         summaryText: document.getElementById('summary_text'),
         durationText: document.getElementById('duration_text'),
+        timeError: document.getElementById('time_error'),
         detailsSection: document.getElementById('details_section'),
         startDatetimeHidden: document.getElementById('id_start_datetime'),
         endDatetimeHidden: document.getElementById('id_end_datetime')
@@ -55,15 +54,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const minDate = new Date();
     minDate.setDate(minDate.getDate() + minAdvanceDays);
     
-    const calendar = flatpickr(calendarEl, {
+    flatpickr(calendarEl, {
         inline: true,
-        mode: 'single',  // Required for onChange to receive selectedDates
+        mode: 'single',
         dateFormat: 'd.m.Y',
         minDate: minDate,
         locale: {
             firstDayOfWeek: 1
         },
-        onChange: function(selectedDates, dateStr, instance) {
+        onChange: function(selectedDates) {
             if (selectedDates.length === 0) return;
             
             const clickedDate = selectedDates[0];
@@ -71,8 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const month = String(clickedDate.getMonth() + 1).padStart(2, '0');
             const day = String(clickedDate.getDate()).padStart(2, '0');
             const apiDate = `${year}-${month}-${day}`;
-            
-            console.log('=== Date selected:', dateStr, '| API:', apiDate);
             
             state.selectedDate = clickedDate;
             
@@ -95,8 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`/booking/slots/${apiDate}/`)
             .then(response => response.json())
             .then(data => {
-                console.log('=== API response:', data);
-                
                 if (data.success && data.has_availability) {
                     showAvailable(data.slots[0]);
                 } else if (data.success && !data.has_availability) {
@@ -106,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                console.error('Fetch error:', error);
+                console.error('Availability check failed:', error);
                 showError('Connection error. Please try again.');
             });
     }
@@ -122,6 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </span>`;
         elements.timeFields.style.display = 'none';
         elements.bookingSummary.style.display = 'none';
+        elements.timeError.style.display = 'none';
         elements.detailsSection.style.display = 'none';
     }
     
@@ -167,6 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         elements.timeFields.style.display = 'none';
         elements.bookingSummary.style.display = 'none';
+        elements.timeError.style.display = 'none';
         elements.detailsSection.style.display = 'none';
     }
     
@@ -179,6 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         elements.timeFields.style.display = 'none';
         elements.bookingSummary.style.display = 'none';
+        elements.timeError.style.display = 'none';
         elements.detailsSection.style.display = 'none';
     }
     
@@ -229,6 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!state.selectedDate || !startTime || !endTime) {
             elements.bookingSummary.style.display = 'none';
+            elements.timeError.style.display = 'none';
             elements.detailsSection.style.display = 'none';
             elements.startDatetimeHidden.value = '';
             elements.endDatetimeHidden.value = '';
@@ -248,19 +247,18 @@ document.addEventListener('DOMContentLoaded', function() {
         startDate.setHours(parseInt(startH), parseInt(startM), 0, 0);
         endDate.setHours(parseInt(endH), parseInt(endM), 0, 0);
         
+        // Validate end after start
         if (endDate <= startDate) {
-            elements.bookingSummary.innerHTML = `
-                <div class="text-danger">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    End time must be after start time
-                </div>`;
-            elements.bookingSummary.style.display = 'block';
+            elements.timeError.textContent = 'End time must be after start time';
+            elements.timeError.style.display = 'block';
+            elements.bookingSummary.style.display = 'none';
             elements.detailsSection.style.display = 'none';
             elements.startDatetimeHidden.value = '';
             elements.endDatetimeHidden.value = '';
             return;
         }
         
+        // Calculate duration
         const diffMs = endDate - startDate;
         const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
         const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -268,34 +266,28 @@ document.addEventListener('DOMContentLoaded', function() {
         let duration = `${diffHrs}h`;
         if (diffMins > 0) duration += ` ${diffMins}m`;
         
+        // Format display date
         const displayDate = state.selectedDate.toLocaleDateString('de-AT', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
         });
         
+        // Build summary text
         let summary = `${startTime} - ${endTime}`;
         if (endsNextDay) summary += ' (next day)';
         summary += ` on ${displayDate}`;
         
-        elements.bookingSummary.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <span>
-                    <i class="bi bi-check-circle text-success me-2"></i>
-                    ${summary}
-                </span>
-                <strong>${duration}</strong>
-            </div>`;
+        // Update UI
+        elements.summaryText.textContent = summary;
+        elements.durationText.textContent = duration;
+        elements.timeError.style.display = 'none';
         elements.bookingSummary.style.display = 'block';
         elements.detailsSection.style.display = 'block';
         
+        // Set hidden inputs for form submission
         elements.startDatetimeHidden.value = formatForBackend(startDate);
         elements.endDatetimeHidden.value = formatForBackend(endDate);
-        
-        console.log('=== Form values:', {
-            start: elements.startDatetimeHidden.value,
-            end: elements.endDatetimeHidden.value
-        });
     }
     
     function formatForBackend(date) {
@@ -306,6 +298,4 @@ document.addEventListener('DOMContentLoaded', function() {
         const mins = String(date.getMinutes()).padStart(2, '0');
         return `${year}-${month}-${day}T${hours}:${mins}`;
     }
-    
-    console.log('=== Booking form ready ===');
 });
