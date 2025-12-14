@@ -12,7 +12,7 @@
                 <i class="bi bi-arrow-left me-1"></i> Back to My Bookings
             </a>
             
-            <!-- Header -->
+            <!-- Header w/ Edit and Cancel Conditional Buttons -->
             <div class="d-flex justify-content-between align-items-start mb-4">
                 <div>
                     <h2>{{ booking.event_title }}</h2>
@@ -21,7 +21,16 @@
                     </span>
                 </div>
                 
-                <!-- Edit/Cancel buttons placeholder -->
+                {% if booking.status == 'pending' %}
+                <div>
+                    <a href="{% url 'booking_edit' booking.pk %}" class="btn me-2">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </a>
+                    <button type="button" class="btn">
+                        <i class="bi bi-x-lg me-1"></i> Cancel
+                    </button>
+                </div>
+                {% endif %}
             </div>
             
             <!-- Event Details Card -->
