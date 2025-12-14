@@ -1,12 +1,15 @@
 from django.shortcuts import render, redirect
+from django.views import generic
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import datetime, timedelta
 from .forms import BookingRequestForm
 from .slots import get_available_slots, format_slots_for_display
 from .rules import MINIMUM_ADVANCE_DAYS, MINIMUM_GUESTS
+from .models import Booking
 
 
 @login_required(login_url='account_login')
@@ -74,3 +77,35 @@ def get_slots_for_date(request, date_str):
         'slots': formatted_slots,
         'has_availability': len(formatted_slots) > 0 
     })
+
+
+class BookingList(LoginRequiredMixin, generic.ListView):
+    """
+    Display list of user's bookings.
+    Filtered by current user with status counts for tabs.
+    """
+    model = Booking
+    template_name = 'booking/bookings.html'
+    context_object_name = 'bookings'
+    login_url = 'account_login'
+
+    def get_queryset(self):
+        """Return only bookings for current user."""
+        return Booking.objects.filter(
+            customer=self.request.user
+        ).order_by('-start_datetime')
+
+    def get_context_data(self, **kwargs):
+        """Add status counts for tabs."""
+        context = super().get_context_data(**kwargs)
+        today = timezone.now()
+        bookings = self.get_queryset()
+
+        context['pending_count'] = bookings.filter(status='pending').count()
+        context['approved_count'] = bookings.filter(status='approved').count()
+        context['active_count'] = bookings.filter(
+            status='approved', start_datetime__gte=today
+        ).count()
+        context['past_count'] = bookings.filter(start_datetime__lt=today).count()
+
+        return context
