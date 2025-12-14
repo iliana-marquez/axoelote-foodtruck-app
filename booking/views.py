@@ -107,6 +107,12 @@ class BookingList(LoginRequiredMixin, generic.ListView):
         today = timezone.now()
         bookings = self.get_queryset()
 
+        bookings_with_permissions = []
+        for booking in bookings:
+            booking.permissions = get_edit_permissions(booking)
+            bookings_with_permissions.append(booking)
+
+        context['bookings'] = bookings_with_permissions
         context['pending_count'] = bookings.filter(status='pending').count()
         context['approved_count'] = bookings.filter(status='approved').count()
         context['active_count'] = bookings.filter(
