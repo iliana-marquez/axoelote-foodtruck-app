@@ -356,6 +356,34 @@ Events spanning midnight (e.g., wedding 18:00-02:00) currently override the foll
 - Establish business rules with stakeholders for minimum prep/setup time between events
 - Add configurable buffer periods to determine when regular schedule should resume
 
+## Admin-Configurable Settings 
+
+**Current state:** Constants in `booking/rules.py`
+- MINIMUM_ADVANCE_DAYS = X day in advanced for booking system 
+- MINIMUM_GUESTS = X guest for booking system 
+- MINIMUM_GAP_HOURS = X hours gap between events for booking system 
+- FULL_EDIT_DAYS = X days for edit booking permissions
+- COSMETIC_EDIT_DAYS = x days for edit booking permissions
+- CONTACT_EMAIL for UI display 
+- CONTACT_PHONE for UI display 
+
+**Future state:** All configurable via admin panel
+
+**Why:**
+- Business owner can adjust rules without developer
+- Seasonal flexibility (e.g., reduce advance days for slow periods)
+- White-label ready for multiple clients
+- Quick response to market needs
+
+**Scope:**
+- Business rules (days, guests, hours)
+- Contact information
+- Cancellation policy percentages
+- Any other operational constants
+
+**Priority:** V2 post-assessment
+
+
 ### Display Logic Edge Cases
 When multiple approved bookings exist for the same day, only the first booking displays in the schedule. The system doesn't break but could provide more complete information.
 
