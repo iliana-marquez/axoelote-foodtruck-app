@@ -60,8 +60,10 @@
                     <tbody>
                         {% for booking in bookings %}
                         <tr class="booking-row" 
+                            style="cursor: pointer;"
                             data-status="{{ booking.status }}"
-                            data-date="{{ booking.start_datetime|date:'Y-m-d' }}">
+                            data-date="{{ booking.start_datetime|date:'Y-m-d' }}"
+                            onclick="window.location='{% url 'booking_detail' booking.pk %}'">
                             <td>
                                 <strong>{{ booking.event_title }}</strong>
                                 <div class="text-muted small">{{ booking.guest_count }} guests</div>
