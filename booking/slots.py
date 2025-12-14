@@ -278,6 +278,11 @@ def check_slot_available(
         no_conflicts_after = engagement['end'] + min_gap <= start_datetime
 
         if not (no_conflicts_before or no_conflicts_after):
-            return "Time slot no longer available. Please select another."
+            conflict_start = engagement['start'].strftime('%d.%m.%Y %H:%M')
+            conflict_end = engagement['end'].strftime('%d.%m.%Y %H:%M')
+            return (
+                f"Conflicts with existing engagement ({conflict_start} - {conflict_end}). "
+                f"Minimum {MINIMUM_GAP_HOURS}-hour gap required between bookings."
+            )
 
     return None
