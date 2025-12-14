@@ -1,8 +1,9 @@
 """
 Utility functions for booking system.
 Reusable helpers for handling, calculating and formating.
-1. Calculate duration between 2 datetimes (time formatting)
+1. Calculate duration between 2 datetimes (time formatting).
 2. Determine what a customer can edit a booking based on days until event.
+3. most relevant timestamp and label based on booking lifecycle.
 """
 from django.utils import timezone
 from .rules import (
@@ -126,4 +127,53 @@ def get_edit_permissions(booking):
         'editable_fields': COSMETIC_FIELDS + LOCKED_FIELDS,
         'locked_fields': [],
         'message': 'You can edit all booking details.'
+    }
+
+
+def get_status_timestamp(booking):
+    """
+    Get the most relevant timestamp and label based on booking lifecycle.
+
+    Lifecycle labels:
+    - Submitted: Fresh request, never modified
+    - Edited before approval: Pending + user made changes
+    - Approved: Confirmed, no changes since
+    - Edited after approval: Approved + user made changes
+    - Cancelled: Booking cancelled
+
+    Returns:
+        dict: {'label': str, 'timestamp': datetime}
+    """
+    # 1. Submitted (fresh, never touched)
+    if booking.status == 'pending' and booking.approved_at is None and booking.updated_at <= booking.created_at:
+        return {
+            'label': 'Submitted',
+            'timestamp': booking.created_at
+        }
+
+    # 2. Edited before approval (pending, edited, never approved)
+    if booking.status == 'pending' and booking.approved_at is None and booking.updated_at > booking.created_at:
+        return {
+            'label': 'Edited before approval',
+            'timestamp': booking.updated_at
+        }
+
+    # 3. Approved (confirmed, untouched)
+    if booking.status == 'approved':
+        return {
+            'label': 'Approved',
+            'timestamp': booking.approved_at
+        }
+
+    # 4. Edited after approval (was approved, user edited, now pending)
+    if booking.status == 'pending' and booking.approved_at is not None:
+        return {
+            'label': 'Edited after approval',
+            'timestamp': booking.updated_at
+        }
+
+    # 5. Cancelled
+    return {
+        'label': 'Cancelled',
+        'timestamp': booking.updated_at
     }
