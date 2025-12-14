@@ -2,7 +2,7 @@
 Utility functions for booking system.
 Reusable helpers for handling, calculating and formating.
 1. Calculate duration between 2 datetimes (time formatting)
-2. Determine what a customer can edit based on days until event.
+2. Determine what a customer can edit a booking based on days until event.
 """
 from django.utils import timezone
 from .rules import FULL_EDIT_DAYS, COSMETIC_EDIT_DAYS, LOCKED_FIELDS, COSMETIC_FIELDS
@@ -45,6 +45,13 @@ def get_edit_permissions(booking):
     """
     Determine what a customer can edit based on days until event.
 
+    Flow (chronological):
+    1. Cancelled → No edit
+    2. Past event → No edit (different message for pending vs approved)
+    3. 0-2 days → No edit, contact admin
+    4. 3-14 days → Cosmetic only
+    5. 15+ days → Full edit
+
     Returns:
         dict: {
             'can_edit': bool,
@@ -55,6 +62,7 @@ def get_edit_permissions(booking):
             'message': str
         }
     """
+    # 1. Cancelled bookings
     if booking.status == 'cancelled':
         return {
             'can_edit': False,
@@ -67,25 +75,24 @@ def get_edit_permissions(booking):
 
     days_until = (booking.start_datetime.date() - timezone.now().date()).days
 
-    if days_until >= FULL_EDIT_DAYS:
+    # 2. Past events (already happened)
+    if days_until < 0:
+        if booking.status == 'pending':
+            message = 'This event passed its due date.'
+        else:
+            message = 'This event has already passed.'
+
         return {
-            'can_edit': True,
-            'edit_level': 'full',
+            'can_edit': False,
+            'edit_level': 'none',
             'days_until': days_until,
-            'editable_fields': COSMETIC_FIELDS + LOCKED_FIELDS,
+            'editable_fields': [],
             'locked_fields': [],
-            'message': 'You can edit all booking details.'
+            'message': message
         }
-    elif days_until >= COSMETIC_EDIT_DAYS:
-        return {
-            'can_edit': True,
-            'edit_level': 'cosmetic',
-            'days_until': days_until,
-            'editable_fields': COSMETIC_FIELDS,
-            'locked_fields': LOCKED_FIELDS,
-            'message': f'Your event is in {days_until} days. Only title, description, and photo can be changed.'
-        }
-    else:
+
+    # 3. Very soon (0-2 days): Contact admin
+    if days_until < COSMETIC_EDIT_DAYS:
         return {
             'can_edit': False,
             'edit_level': 'none',
@@ -94,3 +101,24 @@ def get_edit_permissions(booking):
             'locked_fields': [],
             'message': f'Your event is in {days_until} days. Please contact us for urgent changes.'
         }
+
+    # 4. Coming soon (3-14 days): Cosmetic only
+    if days_until < FULL_EDIT_DAYS:
+        return {
+            'can_edit': True,
+            'edit_level': 'cosmetic',
+            'days_until': days_until,
+            'editable_fields': COSMETIC_FIELDS,
+            'locked_fields': LOCKED_FIELDS,
+            'message': f'Your event is in {days_until} days. Only title, description, and photo can be changed.'
+        }
+
+    # 5. Far away (15+ days): Full edit
+    return {
+        'can_edit': True,
+        'edit_level': 'full',
+        'days_until': days_until,
+        'editable_fields': COSMETIC_FIELDS + LOCKED_FIELDS,
+        'locked_fields': [],
+        'message': 'You can edit all booking details.'
+    }
