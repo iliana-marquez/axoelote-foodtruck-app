@@ -287,6 +287,88 @@ axoelote_foodtruck/
 - Time validation and conditional address requirements
 - Self-exclusion logic for editing existing events
 
+
+### BookingDetailView: View vs generic.DetailView
+
+**Decision:** Use base `View` class instead of `generic.DetailView`
+
+**Context:** BookingDetailView handles both display and inline editing on the same page.
+
+**Why not generic.DetailView:**
+
+| generic.DetailView provides | Food Truck App needs |
+|----------------------------|-----------|
+| Single object lookup | ✓ Same |
+| GET only (display) | ✗ Need GET + POST |
+| Simple context | ✗ Need form + permissions + business rules |
+| Standard template rendering | ✗ Need conditional edit sections |
+
+**Why base View is better here:**
+
+| Benefit | Explanation |
+|---------|-------------|
+| Full control | Custom GET (display) and POST (save) methods |
+| Mixed responsibilities | Same URL handles view + edit |
+| Permission logic | Tiered edit permissions (full/cosmetic/none) |
+| Locked fields | Restore locked fields on cosmetic edit |
+| Clean separation | `get()` for display, `post()` for save, `get_booking()` shared |
+
+**Code clarity:**
+```python
+class BookingDetailView(LoginRequiredMixin, View):
+    def get_booking(self, pk):  # Shared logic
+    def get(self, request, pk):  # Display
+    def post(self, request, pk):  # Save edits
+```
+
+**When to use each:**
+
+| Scenario | Class |
+|----------|-------|
+| Simple list | `generic.ListView` |
+| Simple display | `generic.DetailView` |
+| Simple form | `generic.CreateView` / `generic.UpdateView` |
+| Mixed display + edit | `View` ✓ |
+| Custom business logic | `View` |
+
+### Dynamic Timestamp Labels (No Migration Needed)
+
+**Problem:** Display relevant booking timestamp without adding new model fields.
+
+**Solution:** Use existing fields (`created_at`, `updated_at`, `approved_at`) with logic to determine lifecycle stage.
+
+**Existing fields used:**
+- `created_at`: Auto-set on creation
+- `updated_at`: Auto-updated on any save
+- `approved_at`: Set when admin approves
+
+**Logic in `utils.py` → `get_status_timestamp()`:**
+
+| Condition | Label | Timestamp |
+|-----------|-------|-----------|
+| status == cancelled | Cancelled | updated_at |
+| approved_at is None + updated_at == created_at | Submitted | created_at |
+| approved_at is None + updated_at > created_at | Edited before approval | updated_at |
+| approved_at exists + updated_at == approved_at | Approved | approved_at |
+| approved_at exists + updated_at > approved_at | Edited after approval | updated_at |
+
+**Key insight:** `updated_at > approved_at` means user edited after approval. No new fields required.
+
+**Display format:**
+```
+[Badge: Status] · [Label] [Date]
+[Pending] · Edited before approval 15.12.2025
+[Approved] · Edited after approval 17.12.2025
+```
+
+**Benefit:** 
+- Zero migrations
+- Clean audit trail
+- User-friendly labels
+- Leverages Django's auto-timestamp fields
+
+**Lesson:** Before adding new fields, check if existing data + logic can solve the problem.
+
 ### Testing Strategy
 
 **Comprehensive Test Coverage**
@@ -349,14 +431,14 @@ Events spanning midnight (e.g., wedding 18:00-02:00) currently override the foll
 
 
 **Future Enhancement:**  
-- Implement database-level constraints and comprehensive conflict checking across all booking and event creation methods.  
+- Implement database-level constraints and comprehensive conflict checking across all booking and event crveation methods.  
 - Ensure that admin-created events and customer booking requests cannot overlap for the same date/time.  
 - Provide clear error messages to users when a requested slot is unavailable.  
 - Implement time-aware schedule logic that considers event end times vs. regular schedule start times
 - Establish business rules with stakeholders for minimum prep/setup time between events
 - Add configurable buffer periods to determine when regular schedule should resume
 
-## Admin-Configurable Settings 
+## Admin-Configurable Settings (for V2)
 
 **Current state:** Constants in `booking/rules.py`
 - MINIMUM_ADVANCE_DAYS = X day in advanced for booking system 
@@ -381,7 +463,27 @@ Events spanning midnight (e.g., wedding 18:00-02:00) currently override the foll
 - Cancellation policy percentages
 - Any other operational constants
 
-**Priority:** V2 post-assessment
+
+## Booking Timeline UI instead of sigle timestamp with current record (for V2)
+
+**Concept:** Visual timeline showing booking lifecycle
+
+**Statuses to track:**
+- Submitted (created_at)
+- Approved (approved_at)
+- Edit Requested (edit_requested_at)
+- Cancelled (cancelled_at)
+- Completed (end_datetime passed)
+
+**Model fields needed:**
+- cancelled_at (DateTimeField, null=True)
+- edit_requested_at (DateTimeField, null=True)
+
+**UI:** Horizontal or vertical progress indicator with dates
+
+**Inspiration:** Shipping trackers, order status pages
+
+**Benefit:** Professional UX, clear communication, audit trail
 
 
 ### Display Logic Edge Cases
