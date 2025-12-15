@@ -32,11 +32,8 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
   - [Authentication & Authorization](#authentication--authorization)
 - [Business Rules](#business-rules)
 - [Development Process](#development-process)
-  - [Initial Setup & Architecture Decisions](#initial-setup--architecture-decisions)
-  - [Model Development & Testing](#model-development--testing)
-  - [Form Development & Validation](#form-development--validation)
-  - [Testing Strategy](#testing-strategy)
-  - [Critical Bug Fixes](#critical-bug-fixes)
+  - [Agile Methodology](#agile-methodology)
+  - [Architecture Decisions](#architecture-decisions)
 - [Known Limitations](#known-limitations)
 - [Installation & Setup](#installation--setup)
   - [Local Development](#local-development)
@@ -428,141 +425,62 @@ Allows adequate time for cleanup, rest, travel, and setup between consecutive ev
 
 ---
 
-
 ## Development Process
 
-### Initial Setup & Architecture Decisions
+### Initial Setup 
 
 **Environment Configuration**
-- Implemented dynamic DEBUG toggle: `DEBUG = 'DYNO' not in os.environ`
+- Implemented dynamic DEBUG toggle: `DEBUG = 'DYNO' not in os.environ` for True/False Toogle in production + deployment testing
 - Separated development/production database configurations
-- Established secure environment variable management
+- Established secure environment variable management 
 
-**User Management**
-- Created test users: Axoelote (admin) and Patricia (customer)
-- Resolved database conflicts from previous projects by requesting new DATABASE_URL
-- Implemented Allauth for robust authentication flow
+### Agile Methodology
 
-**Third-party Integrations**
-- **Cloudinary**: Verified image upload functionality through shell testing
-- **Summernote**: Rich text editing for event descriptions and special requests
-- **Crispy Forms**: Bootstrap 5 template pack for professional form rendering
-- **Django Countries**: Geographic validation (pending deprecation update)
+Project managed using GitHub Projects with Kanban board.
 
-### Model Development & Testing
+[GitHub Project Board](https://github.com/users/iliana-marquez/projects/13/views/1)
 
-**BookingRequest Evolution**
-- Initial model established guest minimum validation (70+ guests)
-- Added conditional description requirements for open events
-- Implemented 72-hour advance booking business rule
-- Enhanced with file upload and dietary restriction messaging
+**MoSCoW Prioritization**
 
-**Event Model Architecture**
-- Designed with PROTECT constraints for admin accountability
-- Conditional address validation based on event type
-- Status tracking with future notification feature preparation
-- Chronological ordering for intuitive admin management
+| Priority | User Stories | Status |
+|----------|--------------|--------|
+| Must Have | Core booking, authentication, schedule display | Complete |
+| Should Have | Inline editing, availability checking | Complete |
+| Could Have | Email notifications, calendar export, menu, about, contact | V2 |
+| Won't Have | Payment processing, multi-vendor | Out of scope / reasess for V3 |
 
-**RegularSchedule Implementation**
-- Boolean day fields for flexible schedule management
-- Dynamic day range display logic (consecutive vs. non-consecutive)
-- Integration with priority-based schedule display system
+**Sprint Workflow**
 
-### Form Development & Validation
+1. User stories refined into tasks
+2. Feature branches for development
+3. Testing before merge
+4. Atomic commits with descriptive messages
 
-**BookingRequestForm Features**
-- HTML5 datetime-local inputs for better UX
-- Comprehensive validation: time order, guest minimums, conditional descriptions
-- File upload handling with Cloudinary integration
-- Authentication requirement with proper error messaging
+### Architecture Decisions
 
-**EventAdminForm Security**
-- Restricted admin dropdown to staff users only
-- Conflict detection to prevent double-booking
-- Time validation and conditional address requirements
-- Self-exclusion logic for editing existing events
+**BookingDetailView: View vs generic.DetailView**
 
-
-### BookingDetailView: View vs generic.DetailView
-
-**Decision:** Use base `View` class instead of `generic.DetailView`
-
-**Context:** BookingDetailView handles both display and inline editing on the same page.
-
-**Why not generic.DetailView:**
-
-| generic.DetailView provides | Food Truck App needs |
+| generic.DetailView provides | App needs |
 |----------------------------|-----------|
 | Single object lookup | ✓ Same |
 | GET only (display) | ✗ Need GET + POST |
-| Simple context | ✗ Need form + permissions + business rules |
-| Standard template rendering | ✗ Need conditional edit sections |
+| Simple context | ✗ Need form + permissions + rules |
 
-**Why base View is better here:**
+**Decision:** Base `View` class for full control over mixed display/edit functionality.
 
-| Benefit | Explanation |
-|---------|-------------|
-| Full control | Custom GET (display) and POST (save) methods |
-| Mixed responsibilities | Same URL handles view + edit |
-| Permission logic | Tiered edit permissions (full/cosmetic/none) |
-| Locked fields | Restore locked fields on cosmetic edit |
-| Clean separation | `get()` for display, `post()` for save, `get_booking()` shared |
-
-**Code clarity:**
 ```python
 class BookingDetailView(LoginRequiredMixin, View):
     def get_booking(self, pk):  # Shared logic
     def get(self, request, pk):  # Display
-    def post(self, request, pk):  # Save edits
+    def post(self, request, pk):  # Save edits or delete
 ```
 
-**When to use each:**
+**Reusable Components**
 
-| Scenario | Class |
-|----------|-------|
-| Simple list | `generic.ListView` |
-| Simple display | `generic.DetailView` |
-| Simple form | `generic.CreateView` / `generic.UpdateView` |
-| Mixed display + edit | `View` ✓ |
-| Custom business logic | `View` |
-
-### Dynamic Timestamp Labels (No Migration Needed)
-
-**Problem:** Display relevant booking timestamp without adding new model fields.
-
-**Solution:** Use existing fields (`created_at`, `updated_at`, `approved_at`) with logic to determine lifecycle stage.
-
-**Existing fields used:**
-- `created_at`: Auto-set on creation
-- `updated_at`: Auto-updated on any save
-- `approved_at`: Set when admin approves
-
-**Logic in `utils.py` → `get_status_timestamp()`:**
-
-| Condition | Label | Timestamp |
-|-----------|-------|-----------|
-| status == cancelled | Cancelled | updated_at |
-| approved_at is None + updated_at == created_at | Submitted | created_at |
-| approved_at is None + updated_at > created_at | Edited before approval | updated_at |
-| approved_at exists + updated_at == approved_at | Approved | approved_at |
-| approved_at exists + updated_at > approved_at | Edited after approval | updated_at |
-
-**Key insight:** `updated_at > approved_at` means user edited after approval. No new fields required.
-
-**Display format:**
-```
-[Badge: Status] · [Label] [Date]
-[Pending] · Edited before approval 15.12.2025
-[Approved] · Edited after approval 17.12.2025
-```
-
-**Benefit:** 
-- Zero migrations
-- Clean audit trail
-- User-friendly labels
-- Leverages Django's auto-timestamp fields
-
-**Lesson:** Before adding new fields, check if existing data + logic can solve the problem.
+| Component | Location | Used By |
+|-----------|----------|---------|
+| Cancel Modal | `includes/cancel_modal.html` | booking_detail, bookings list |
+| Calendar Picker | Flatpickr inline | booking form, booking edit |
 
 ### Testing Strategy
 
