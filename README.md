@@ -786,7 +786,7 @@ Implementation requires:
 
 ---
 
-## Future Enhancements
+## Future Enhancements Summary
 
 ### V2 Priorities
 
@@ -815,41 +815,48 @@ Implementation requires:
 
 ### For Assessors
 
-#### Test Accounts
+**Test Accounts**
+
 - **Admin User**: `Axoelote` / `[password provided separately]`
 - **Customer User**: `Patricia` / `[password provided separately]`
 
-#### Key Features to Test
+**Key Features to Test**
 
-**As a Customer (patricia):**
-1. **Register/Login**: Test authentication system
-2. **View Schedule**: See today's food truck location on homepage
-3. **Submit Booking**: Create and submit a catering request (70+ guests, 72hr advance notice)
+| As Customer | Actions |
+|-------------|---------|
+| Register/Login | Test authentication system |
+| View Schedule | See today's location on homepage |
+| Submit Booking | Create request (70+ guests, 15 days advance) |
+| View Bookings | See list with status tabs |
+| Edit Booking | Modify details inline |
+| Delete Booking | Cancel via modal confirmation |
 
-**As an Admin (axoelote):**
-1. **Admin Panel**: Access Django admin at `/admin/`
-2. **Manage Events**: Create, Edit or Delete events that override regular schedule
-3. **Manage Bookings**: Approve/reject customer requests
-4. **Update Schedule**: Modify regular operating hours and see them reflected on "where to find me" section
-
-#### Testing the Business Logic
-- **Schedule Priority**: Events override regular schedule display
-- **Validation**: Try booking with <70 guests or <72hr advance notice
-- **Multi-day Events**: Create events spanning multiple days
+| As Admin | Actions |
+|----------|---------|
+| Admin Panel | Access at `/admin/` |
+| Manage Events | Create, edit, delete schedule overrides |
+| Manage Bookings | Approve/reject customer requests |
+| Update Schedule | Modify regular operating hours |
 
 ### For Users
 
-#### Customer Workflow
+**Customer Workflow**
+
 1. Register for an account
 2. Check today's location on homepage
-3. Submit catering requests through the booking form 
+3. Submit catering request through booking form
+4. View and manage bookings from dashboard
+5. Edit or cancel bookings as needed
 
+**Admin Workflow**
 
-#### Admin Workflow
 1. Login to admin panel
 2. Create events to override schedule
 3. Review and respond to booking requests
 4. Update regular schedule as needed
+
+---
+
 
 ## Acknowledgements
 
