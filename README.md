@@ -486,6 +486,15 @@ Although initial attempts were made to handle this at the form-validation level,
 ### Cross-Day Event Schedule Override
 Events spanning midnight (e.g., wedding 18:00-02:00) currently override the following day's regular schedule entirely. This may prevent normal operations when the food truck could realistically serve the regular schedule after late events conclude. 
 
+###  Default Availability Window Display**
+
+When a date has no engagements, the availability window displays as "00:00 - 00:00 (next day)". While technically correct (full 24h availability), this may confuse users into thinking late-night bookings aren't possible or that no slots are available.
+
+- **Current display:** "Available! Window: 00:00 - 00:00 (next day)"
+- **User perception:** Potentially misleading, may appear as "no availability" eventhough bookings can extend overnight if slot is available (manually posible by checking "Ends next day") under End time input
+- **Business rule:** Business owner allows any times as long as 10-hour gap exists between events
+- **Status:** UX improvement needed for clearer messaging or extended default window (e.g., 02:00 or 06:00 next day)
+
 
 **Future Enhancement:**  
 - Implement database-level constraints and comprehensive conflict checking across all booking and event crveation methods.  
