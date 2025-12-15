@@ -187,6 +187,9 @@ def get_slots_for_date(request, date_str):
     """
     API endpoint to get available slots for a specific date.
     Returns JSON with available time slots.
+
+    Query params:
+        exclude: Booking ID to exclude from conflict chek for editing
     """
     try:
         target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
@@ -205,7 +208,10 @@ def get_slots_for_date(request, date_str):
                 MINIMUM_ADVANCE_DAYS} days in advance."
         }, status=400)
 
-    slots = get_available_slots(target_date)
+    # get exclude ID for edit mode
+    exclude_id = request.GET.get('exclude')
+
+    slots = get_available_slots(target_date, exclude_booking_id=exclude_id)
     formatted_slots = format_slots_for_display(slots)
 
     return JsonResponse({
