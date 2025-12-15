@@ -47,3 +47,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Cancel modal population
+document.querySelectorAll('.cancel-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.getElementById('modal_event_title').textContent = this.dataset.title;
+        document.getElementById('modal_event_datetime').textContent = this.dataset.datetime;
+        document.getElementById('cancel_form').action = `/booking/${this.dataset.bookingId}/`;
+    });
+});
