@@ -80,14 +80,17 @@ As a **visitor**, I want:
 
 ### Key Features
 
-- **Customer Booking System**: Authenticated users can submit catering requests with 72-hour advance notice
+- **Customer Booking System**: Authenticated users can submit catering requests with advance notice requirements
+- **Booking Management Dashboard**: View, edit, and delete bookings with tiered permissions
+- **Slot Availability Checker**: Real-time availability with 10-hour gap enforcement between events
+- **Inline Editing**: Edit booking details directly on the detail page with immediate feedback
 - **Event Management**: Admin-controlled event creation and schedule management
 - **Dynamic Schedule Display**: Real-time location information prioritizing events over regular schedule
 - **Multi-day Event Support**: Proper handling of events spanning multiple days
 - **File Upload Integration**: Cloudinary-powered image handling for events and bookings
 - **Responsive Design**: Mobile-first approach with Bootstrap 5
 - **Role-based Access**: Customer vs. admin functionality separation
-</details>
+
 
 ## Technology Stack
 
