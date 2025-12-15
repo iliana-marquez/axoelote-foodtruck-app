@@ -38,18 +38,15 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
   - [User Story Testing](#user-story-testing)
   - [Automated Testing](#automated-testing)
   - [Validation](#validation)
-- [Known Limitations](#known-limitations)
-- [Installation & Setup](#installation--setup)
+- [Bug Fixes](#bug-fixes)
+- [Known Issues](#known-issues)
+- [Deployment](#deployment)
+  - [Heroku Deployment Steps](#heroku-deployment-steps)
   - [Local Development](#local-development)
-  - [Production Deployment](#production-deployment)
 - [Future Enhancements](#future-enhancements)
 - [Usage Instructions](#usage-instructions)
 - [Acknowledgements](#acknowledgements)
-- [Key Takeaways](#acknowledgements)
-    - [Planning vs. Agility Balance](#planning-vs-agility-balance)
-    - [The Value of Initial Architecture](#the-value-of-initial-architecture)
-    - [Flexible Design Principles](#flexible-design-principles)
-    - [Development Velocity](#development-velocity)
+- [Key Takeaways](#key-takeaways)
 
 ## Project Overview
 
@@ -787,58 +784,32 @@ Implementation requires:
 - Filter cancelled bookings from customer views
 - Admin dashboard for cancelled bookings
 
-
-## Installation & Setup
-
-### Local Development
-```bash
-# Clone repository
-git clone [repository-url]
-cd axoelote-foodtruck-app
-
-# Virtual environment
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Environment configuration
-cp .env.example .env
-# Edit .env with your configuration values
-
-# Database setup
-python manage.py migrate
-python manage.py createsuperuser
-
-# Run development server
-python manage.py runserver
-```
-
-### Production Deployment
-The application is configured for Heroku deployment with:
-- PostgreSQL database integration
-- Cloudinary media storage
-- WhiteNoise static file serving
-- Secure environment variable management
+---
 
 ## Future Enhancements
 
-### Immediate Priorities
-1. **Double-booking Prevention**: Implement to eliminate overlapping bookings and events
-2. **Cross-Day Event Logic**: Refine schedule override behavior for events spanning midnight
-3. **Django Countries Update**: Replace deprecated package before November 2025
+### V2 Priorities
+
+| Feature | Description |
+|---------|-------------|
+| Soft Delete | Preserve cancelled bookings for audit trail |
+| Multi-Timezone Support | Re-enable USE_TZ with proper handling |
+| Admin-Configurable Rules | Business rules via admin panel |
+| Email Notifications | Booking confirmation and status updates |
+| Calendar Export | iCal/Google Calendar integration |
+| Booking Form Time Filtering | Align with booking_detail dropdown behavior |
 
 ### Long-term Features
-1. **Automated Customer Notifications**: Leverage postponed event status
-2. **Calendar View**: Broader UX for schedule management
-3. **Dietary Restriction Management**: Structured dropdown selections
-4. **Advanced Reporting**: Analytics for booking patterns and revenue
-5. **Menu Display & Management**: Showcase food offerings with pricing and availability
-6. **Social Media Integration**: Connect Instagram/Facebook feeds and sharing capabilities
-7. **Customer Testimonials & Reviews**: Display feedback and ratings system
-8. **About Section w/ Contact Form**: For visitors and users to address general inquiries
-9. **Support Contact Form**: For visitors and users to reach technical support or address inquiries directly through the application.
+
+- Automated customer notifications
+- Calendar view for schedule management
+- Dietary restriction structured selection
+- Advanced reporting and analytics
+- Menu display and management
+- Social media integration
+- Customer testimonials and reviews
+
+---
 
 ## Usage Instructions
 
