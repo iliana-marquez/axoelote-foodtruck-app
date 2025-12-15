@@ -92,6 +92,31 @@ As a **visitor**, I want:
 - **Role-based Access**: Customer vs. admin functionality separation
 
 
+## UX Design
+
+### Wireframes
+
+**Home Page**
+
+![Home Page Wireframe](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765791118/wireframe_homepage_dttemc.png)
+
+**Booking Request Form**
+
+![Booking Form Wireframe](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765792395/wireframe_booking_request_zrtfda.png)
+
+**Booking Management Dashboard**
+
+![Bookings List Wireframe](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765791118/wireframe_bookings_pewei2.png)
+
+**Booking Detail with Inline Edit**
+
+![Booking Detail Wireframe (based on booking request)](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765791118/wireframe_booking_detail_display_mode_fdm9jd.png)
+
+### Design Decisions
+
+
+
+
 ## Technology Stack
 
 ### Backend
