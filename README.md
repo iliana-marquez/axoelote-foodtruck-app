@@ -91,7 +91,7 @@ As a **visitor**, I want:
 - **Responsive Design**: Mobile-first approach with Bootstrap 5
 - **Role-based Access**: Customer vs. admin functionality separation
 
-
+---
 ## UX Design
 
 ### Wireframes
@@ -114,7 +114,35 @@ As a **visitor**, I want:
 
 ### Design Decisions
 
+**Peerspace-Inspired Booking Flow**
 
+The booking interface draws inspiration from [Peerspace](https://www.peerspace.com/), implementing a progressive disclosure pattern:
+
+1. **Pick date** → User selects date from inline calendar
+2. **See availability** → System shows available time window
+3. **Select times** → Filtered dropdowns show only valid options
+4. **Fill details** → Complete remaining booking information
+5. **Submit** → Confirmation with success feedback
+
+This approach reduces cognitive load by showing relevant options only when needed.
+
+**Inline Calendar vs. Date Picker**
+
+| Approach | Pros | Cons |
+|----------|------|------|
+| Standard date picker | Familiar, compact | No availability context |
+| Inline calendar | Shows availability instantly | Takes more space |
+
+**Decision:** Inline calendar using Flatpickr, enabling real-time availability feedback as users browse dates.
+
+**Information Hierarchy**
+
+- Primary actions (Submit, Save) use brand color (danger/red)
+- Secondary actions (Cancel, Back) use outline variants
+- Status badges provide immediate booking state recognition
+- Timestamp labels show relevant lifecycle information
+
+---
 
 
 ## Technology Stack
