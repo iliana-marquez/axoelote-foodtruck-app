@@ -25,10 +25,11 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
   - [Booking Model](#booking-model)
   - [Event Model](#event-model)
   - [RegularSchedule Model](#regularschedule-model)
-- [Application Architecture](#application-architecture)
-  - [App Structure](#app-structure)
-  - [Data Models](#data-models)
-  - [Business Logic Priority](#business-logic-priority)
+- [Features](#features)
+  - [CRUD Operations](#crud-operations)
+  - [Booking Management System](#booking-management-system)
+  - [Slot Availability System](#slot-availability-system)
+  - [Authentication & Authorization](#authentication--authorization)
 - [Development Process](#development-process)
   - [Initial Setup & Architecture Decisions](#initial-setup--architecture-decisions)
   - [Model Development & Testing](#model-development--testing)
@@ -260,56 +261,148 @@ Previously named `BookingRequest`, renamed to `Booking` for clarity.
 ---
 
 ## Features
+### CRUD Operations
 
-- **BookingRequest.customer**: ForeignKey with CASCADE deletion (if user deleted, their bookings are removed)
-- **Event.admin**: ForeignKey with PROTECT deletion (prevents accidental admin deletion if they have events)
-- **RegularSchedule**: Independent model for default schedule fallback
-- **CloudinaryField**: Used for image storage in both BookingRequest and Event models
-- **CountryField**: Standardized country selection across all location-based models
+Full Create, Read, Update, Delete functionality with user feedback on all operations.
 
-### Business Logic Implementation
+| Operation | Feature | User Feedback |
+|-----------|---------|---------------|
+| **Create** | Booking request form | "Booking request submitted successfully!" |
+| **Read** | Bookings list, booking detail | Tabbed interface with status filtering |
+| **Update** | Inline edit on booking detail | "Booking updated successfully" |
+| **Delete** | Cancel modal confirmation | "{title} has been deleted." |
 
-1. **Schedule Priority**: Events override RegularSchedule for display
-2. **Validation**: 70+ guest minimum enforced at model level
-3. **Status Tracking**: Both BookingRequest and Event models include status management
-4. **Audit Trail**: created_at/updated_at timestamps on all user-generated content
+CRUD Create: Booking Form Initial State
+![CRUD Create: Booking Form Initial State](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765795063/Screenshot_2025-12-15_at_11.37.06_jga2no.png)
+
+CRUD Read - Bookings List
+![CRUD Read - Bookings List](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765795174/bookings_list_oow23e.png)
+
+CRUD Update - Inline Edit
+![CRUD Update - Inline Edit](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765795316/booking_detail_w_inline_edit_toggle_btns_a9rxxr.png)
+
+CRUD Delete - Cancel Modal
+![CRUD Delete - Cancel Modal](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765795739/delete_booking_modal_srgmk6.png)
+
+**Delete Implementation Decision**
+
+For assessment purposes, delete performs a hard delete (permanently removes record). This clearly satisfies CRUD requirements while V2 will implement soft delete for business audit trails.
+
+| Current (Assessment) | Future (V2) |
+|---------------------|-------------|
+| Hard delete | Soft delete with status tracking |
+| Record removed | Record hidden, preserved for audit |
+| Immediate feedback | Cancellation reason tracking |
+
+### Booking Management System
+
+**Bookings Dashboard**
+
+![Bookings Dashboard](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765795174/bookings_list_oow23e.png)
+
+Tabbed interface allowing users to filter bookings by status:
+
+| Tab | Filter | Purpose |
+|-----|--------|---------|
+| ALL | No filter | Overview of all bookings |
+| PENDING | status='pending' | Awaiting approval |
+| APPROVED | status='approved' | Confirmed bookings |
+| ACTIVE | Today's date in range | Currently happening |
+| PAST | end_datetime < now | Historical records |
 
 
-## Application Architecture
 
-### App Structure
+**Tiered Edit Permissions**
+
+Edit capabilities based on proximity to event date:
+
+| Days Until Event | Edit Level | Editable Fields |
+|------------------|------------|-----------------|
+| 15+ days | Full | All fields including date/time |
+| 3-14 days | Cosmetic | Title, description, photo only |
+| 0-2 days | None | Contact admin to make changes |
+| Past/Cancelled | None | Read-only |
+
+Constants defined in `booking/rules.py`:
+
+```python
+FULL_EDIT_DAYS = 15
+COSMETIC_EDIT_DAYS = 3
 ```
-axoelote_foodtruck/
-├── home/              # Landing page and schedule orchestration
-├── booking/           # Customer booking request management  
-├── events/            # Admin event creation and management
-└── templates/         # Shared template inheritance
-```
 
-### Data Models
+**Inline Edit Interface**
 
-#### BookingRequest
-- Customer-submitted catering requests
-- 70+ guest minimum with 72-hour advance notice
-- Address validation and photo upload support
-- Status tracking: pending → approved/rejected
+Single page handles both display and editing:
 
-#### Event  
-- Admin-created schedule overrides
-- Event types: open (public), private, closure
-- Multi-day support with proper conflict checking
-- Status management: active, postponed, cancelled
+Booking Detail - Display Mode
+![Booking Detail - Display Mode](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765795316/booking_detail_w_inline_edit_toggle_btns_a9rxxr.png)
 
-#### RegularSchedule
-- Default operating pattern (Tue-Sat at Naschmarkt)
-- Boolean day fields for flexible scheduling
-- Fallback display when no events scheduled
+Booking Detail - Edit Mode
+![Booking Detail - Edit Mode](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765795316/booking_detail_edit_toggled_r0kzw0.png)
 
-### Business Logic Priority
-1. **Active Events** (highest priority)
-2. **Approved Bookings** (second priority)  
-3. **Regular Schedule** (fallback)
-4. **Closed** (no schedule available)
+### Slot Availability System
+
+Real-time availability checking for booking date/time selection.
+
+**How It Works:**
+
+1. User selects date on inline calendar
+2. AJAX request to `/booking/slots/{date}/` API
+3. System calculates available windows considering:
+   - Existing bookings (pending + approved)
+   - Admin events (active status)
+   - 10-hour gap requirement between engagements
+4. UI displays availability status and filtered time dropdowns
+
+**Availability Window Display**
+
+| Scenario | Display |
+|----------|---------|
+| Fully available | "Available! Window: 00:00 - 00:00 (next day)" |
+| Partial availability | "Available! Window: 13:00 - 00:00 (next day)" |
+| Fully booked | "Fully booked - Please select another date" |
+
+**Slot-Aware Time Dropdowns**
+
+Time selection dropdowns are filtered to show only valid times within the available window. Cross-midnight slots display a "Next day" separator for clarity.
+
+Slot Availability - Available
+![Slot Availability - Available](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765796161/booking_detail_inline_edit_available_slot_naic36.png)
+
+Slot Availability - Fully Booked
+![Slot Availability - Fully Booked](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765796161/booking_detail_inline_edit_fully_booked_jreh2n.png)
+
+### Authentication & Authorization
+
+**Role-Based Access**
+
+| Feature | Visitor | Customer | Admin |
+|---------|---------|----------|-------|
+| View schedule | ✓ | ✓ | ✓ |
+| View public events | ✓ | ✓ | ✓ |
+| Submit booking | ✗ | ✓ | ✓ |
+| View own bookings | ✗ | ✓ | ✓ |
+| Edit own bookings | ✗ | ✓ | ✓ |
+| Delete own bookings | ✗ | ✓ | ✓ |
+| Access admin panel | ✗ | ✗ | ✓ |
+| Manage all events | ✗ | ✗ | ✓ |
+| Approve bookings | ✗ | ✗ | ✓ |
+
+**Login State Reflection**
+
+- Navigation changes based on authentication status
+- Protected views redirect to login with `?next=` parameter
+- Success messages confirm login/logout actions
+
+Navigation - Logged Out
+![Navigation - Logged Out](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765796313/loggedin_navbar_zzcclt.png)
+
+Navigation - Logged In
+![Navigation - Logged In](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765796312/logged_out_navbar_ebd6aa.png)
+
+
+---
+
 
 ## Development Process
 
