@@ -54,9 +54,7 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
 
 ### User Stories
 
-User stories were managed using GitHub Projects with MoSCoW prioritization (Must Have, Should Have, Could Have, Won't Have).
-
-![GitHub Project Board](placeholder_project_board.png)
+User stories were managed using GitHub Projects: [GitHub Project Board](https://github.com/users/iliana-marquez/projects/13/views/1)
 
 As a **customer**, I want:
 - To easily see where the food truck will be today, so I don't go to the wrong location
