@@ -1,0 +1,35 @@
+<!-- Cancel/Delete Booking Modal -->
+<!-- Used by: booking_detail.html (static), bookings.html (dynamic via JS) -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Booking</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="modal_event_title">{% if booking %}{{ booking.event_title }}{% endif %}</strong>?</p>
+                <p class="text-muted" id="modal_event_datetime">
+                    {% if booking %}{{ booking.start_datetime|date:"D d.m.Y" }} at {{ booking.start_datetime|time:"H:i" }}{% endif %}
+                </p>
+                
+                <div class="alert alert-secondary">
+                    <strong>Cancellation Policy:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>15+ days before: 100% refund</li>
+                        <li>14-3 days before: Partial refund</li>
+                        <li>2-0 days before: No refund</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Booking</button>
+                <form id="cancel_form" method="POST" action="{% if booking %}{% url 'booking_detail' booking.pk %}{% endif %}" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="cancel">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
