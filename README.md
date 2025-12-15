@@ -34,6 +34,9 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
 - [Development Process](#development-process)
   - [Agile Methodology](#agile-methodology)
   - [Architecture Decisions](#architecture-decisions)
+- [Testing](#testing)
+  - [User Story Testing](#user-story-testing)
+  - [Automated Testing](#automated-testing)
 - [Known Limitations](#known-limitations)
 - [Installation & Setup](#installation--setup)
   - [Local Development](#local-development)
@@ -521,6 +524,42 @@ Each user story was validated through manual testing with documented results.
 | Understand app purpose | View landing page | Navigate to homepage | Clear hero section with purpose | ✅ Pass |
 | View dynamic schedule | Check schedule section | View "Where to find me" | Today's event or regular schedule | ✅ Pass |
 | Know when truck is closed | Check closed day | View schedule on closed day | "Closed" status displayed | ✅ Pass |
+
+### Automated Testing
+
+### Automated Testing
+
+**Test Summary**
+```bash
+python manage.py test
+# Ran 49 tests in 3.745s - OK
+```
+
+| Test File | Tests | Coverage |
+|-----------|-------|----------|
+| `test_forms.py` | 15 | Form validation, business rules |
+| `test_views.py` | 10 | View responses, authentication |
+| `test_slots_v2.py` | 24 | Slot availability system |
+| **Total** | **49** | ✅ All passing |
+
+**Slot Availability Tests (`test_slots_v2.py`)**
+
+Comprehensive testing of the booking slot system:
+
+| Test Class | Tests | Purpose |
+|------------|-------|---------|
+| EngagementsTestCase | 5 | Fetching bookings and events for date range |
+| AvailableSlotsTestCase | 3 | Slot window calculation accuracy |
+| ExcludeBookingTestCase | 4 | Own booking exclusion during edit |
+| CheckSlotAvailableTestCase | 6 | Conflict detection and validation |
+| SlotsAPITestCase | 4 | API endpoint responses |
+| NaiveDatetimeTestCase | 2 | Timezone handling (USE_TZ=False) |
+
+Automated Test Results
+![Automated Test Results](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765798580/automated_test_terminal_fxskvz.png)
+
+
+
 
 **Comprehensive Test Coverage**
 ```bash
