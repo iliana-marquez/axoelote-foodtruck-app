@@ -19,13 +19,12 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
   - [Wireframes](#wireframes)
   - [Design Decisions](#design-decisions)
 - [Technology Stack](#technology-stack)
-- [Database Schema (ERD)](#database-schema-erd)
-    - [Model Realationships](#model-relationships)
-    - [BookingRequest Table](#bookingrequest-table)
-    - [Event Table](#event-table)
-    - [RegularSchedule Table](#regularschedule-table)
-    - [Key Design Decisions](#key-design-decisions)
-    - [Business Logic Implementation](#business-logic-implementation)
+- [Database Schema](#database-schema)
+  - [Entity Relationship Diagram](#entity-relationship-diagram)
+  - [Model Relationships](#model-relationships)
+  - [Booking Model](#booking-model)
+  - [Event Model](#event-model)
+  - [RegularSchedule Model](#regularschedule-model)
 - [Application Architecture](#application-architecture)
   - [App Structure](#app-structure)
   - [Data Models](#data-models)
@@ -184,15 +183,21 @@ This approach reduces cognitive load by showing relevant options only when neede
 
 ## Database Schema (ERD)
 
+### Entity Relationship Diagram
+
+![ERD Diagram](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765794169/axoelote_erd_dbu9lr.png)
+
 ### Model Relationships
 
 | Relationship | Type | Description |
 |--------------|------|-------------|
-| User → BookingRequest | One-to-Many | Customers can create multiple booking requests |
+| User → Booking | One-to-Many | Customers can create multiple booking requests |
 | User → Event | One-to-Many | Admin users can manage multiple events |
 | RegularSchedule | Singleton | Independent fallback schedule (one active record) |
 
-## BookingRequest Table
+### Booking Model
+
+Previously named `BookingRequest`, renamed to `Booking` for clarity.
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
@@ -205,7 +210,7 @@ This approach reduces cognitive load by showing relevant options only when neede
 | end_datetime | DateTimeField | required | Event end time |
 | description | TextField | optional | Event details (required for open events) |
 | message | TextField | optional | Special requests, dietary restrictions |
-| status | CharField(20) | choices: pending, approved, rejected | Request status |
+| status | CharField(20) | choices: pending, approved, cancelled | Request status |
 | street_address | CharField(80) | required | Event location address |
 | postcode | CharField(20) | required | Postal code |
 | town_or_city | CharField(40) | optional | City name |
@@ -213,8 +218,9 @@ This approach reduces cognitive load by showing relevant options only when neede
 | event_photo | CloudinaryField | optional | Event inspiration photo |
 | created_at | DateTimeField | auto_now_add | Record creation timestamp |
 | updated_at | DateTimeField | auto_now | Last modification timestamp |
+| approved_at | DateTimeField | nullable | Approval timestamp for edit tracking |
 
-## Event Table
+### Event Model
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
@@ -235,7 +241,7 @@ This approach reduces cognitive load by showing relevant options only when neede
 | created_at | DateTimeField | auto_now_add | Record creation timestamp |
 | updated_at | DateTimeField | auto_now | Last modification timestamp |
 
-## RegularSchedule Table
+### RegularSchedule Model
 
 | Field | Type | Constraints | Description |
 |-------|------|-------------|-------------|
@@ -245,19 +251,15 @@ This approach reduces cognitive load by showing relevant options only when neede
 | postcode | CharField(20) | optional | Postal code |
 | town_or_city | CharField(40) | required | City name |
 | country | CountryField | optional | Country selection |
-| monday | BooleanField | default=False | Open on Monday |
-| tuesday | BooleanField | default=True | Open on Tuesday |
-| wednesday | BooleanField | default=True | Open on Wednesday |
-| thursday | BooleanField | default=True | Open on Thursday |
-| friday | BooleanField | default=True | Open on Friday |
-| saturday | BooleanField | default=True | Open on Saturday |
-| sunday | BooleanField | default=False | Open on Sunday |
+| monday - sunday | BooleanField | default varies | Open on each day |
 | opening_time | TimeField | required | Daily opening time |
 | closing_time | TimeField | required | Daily closing time |
 | is_active | BooleanField | default=True | Schedule active status |
 | updated_at | DateTimeField | auto_now | Last modification timestamp |
 
-### Key Design Decisions
+---
+
+## Features
 
 - **BookingRequest.customer**: ForeignKey with CASCADE deletion (if user deleted, their bookings are removed)
 - **Event.admin**: ForeignKey with PROTECT deletion (prevents accidental admin deletion if they have events)
