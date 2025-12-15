@@ -145,7 +145,7 @@ TIME_ZONE = 'Europe/Vienna'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 # Use custom formats, not locale defaults
 USE_L10N = False
