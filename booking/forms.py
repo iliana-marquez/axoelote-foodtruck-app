@@ -82,8 +82,14 @@ class BookingRequestForm(forms.ModelForm):
 
         # check for time conflicts
         if start and end:
-            conflict_error = check_slot_available(start, end)
+            # Exclude own booking when editing (self.instance.pk exists for edits)
+            exclude_id = self.instance.pk if self.instance and self.instance.pk else None
+            conflict_error = check_slot_available(
+                start, end,
+                exclude_booking_id=exclude_id
+                )
             if conflict_error:
                 raise forms.ValidationError(conflict_error)
+
 
         return cleaned_data
