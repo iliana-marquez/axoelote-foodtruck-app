@@ -856,36 +856,63 @@ Implementation requires:
 4. Update regular schedule as needed
 
 ---
-
-
 ## Acknowledgements
 
-This project was heavily inspired and informed by the **Code Institute’s Codestar Blog Project**.  
-The structure, best practices, and overall workflow provided wonderful insights that gave me a lot of knowledge and motivation for building this application.  
-The **logo** and **food truck business concept** used in this project is the property of Axoelote. 
+### Code Institute
 
-A huge thanks to Code Institute for their excellent learning materials and for sparking the ideas that shaped this project. 
+A huge thanks to Code Institute for their excellent learning materials and structured curriculum. The Codestar Blog walkthrough project provided foundational knowledge for Django development, from model design to deployment. The assessment criteria guided feature completeness and documentation standards throughout this project.
 
-Special thanks to **Axoelote** for inspiring this project and for being my first **business customer case**, which marked an important milestone in my development journey. 
+### Axoelote Food Truck
 
-I’m excited to continue learning and can’t wait to start working on **Version 2** with even more features and refinements.  
+Special thanks to **Axoelote** for inspiring this project and providing the real-world business case that shaped its development. The app concept, logo, and business requirements are based on the actual needs of this Vienna-based Mexican food truck business. Key business rules that drove the application logic came directly from discussions with the business owner:
 
+- 70 guest minimum for booking profitability
+- 10-hour gap requirement between events for proper setup/cleanup
+- 15-day advance booking policy
+- Tiered edit permissions based on event proximity
+
+This project represents my first business customer case and marks an important milestone in my development journey, combining academic requirements with genuine business value.
+
+### Technologies & Resources
+
+- [Bootstrap Icons](https://icons.getbootstrap.com/) — Icon library via CDN for consistent UI elements
+- [Django Allauth](https://django-allauth.readthedocs.io/) — Authentication system
+- [Flatpickr](https://flatpickr.js.org/) — Lightweight inline calendar component
+- [Peerspace](https://www.peerspace.com/) — Design inspiration for booking flow UX with progressive disclosure and inline calendar availability checking
+- [Claude (Anthropic)](https://claude.ai/) — AI assistant for debugging, mentorship, and development guidance throughout the project. Given specific roles as field business specialist and enduser to evaluate and enhance: code reviews, architectural decisions, and maintaining momentum during complex feature implementations.
+
+---
 
 ## Key Takeaways
 
 ### Planning vs. Agility Balance
-I spent considerable time upfront planning, writing detailed user stories, and preparing the project board. However, during development, things changed quickly and pivots happened organically - which somewhat diminished the value of extensive pre-planning. A middle ground between thorough planning and documenting-as-you-go might be more efficient for future projects.
+
+Extensive pre-planning provided solid foundation, though development pivots happened organically. A balance between thorough planning and documenting-as-you-go proved most efficient.
 
 ### The Value of Initial Architecture
-Despite the planning overhead, the upfront work paid dividends during development. Almost no major setbacks occurred - just a couple of URL wiring issues in the booking app, which were quickly resolved. This suggests that architectural planning, even if not followed exactly, provides a solid foundation.
+
+Upfront architectural work paid dividends during development. Almost no major setbacks occurred - just URL wiring issues quickly resolved. Good architecture enables rapid feature development.
 
 ### Flexible Design Principles
-Being adaptable and understanding the core business purposes enabled building robust models that could evolve naturally. Even pivot decisions were made with long-term growth in mind, always trying to keep the database as flexible as possible. This approach reduces stress when implementing changes in production environments.
+
+Understanding core business purposes enabled building robust models that could evolve naturally. Keeping the database flexible reduces stress when implementing changes.
 
 ### Development Velocity
-The combination of solid planning and flexible execution were key on the delivery of a production-ready MVP, which demonstrates that good architecture enables rapid feature development and deployment.
+
+The combination of solid planning and flexible execution enabled delivery of a production-ready MVP with genuine business value.
+
+### Testing as Documentation
+
+Comprehensive automated tests (49 total) serve dual purpose: ensuring code quality and documenting expected behavior. Tests revealed timezone bug that manual testing initially missed.
+
+### Class-Based Views Practicality
+
+Initially hesitant about CBVs, but `BookingDetailView` proved their value. Combining GET (display) and POST (edit/delete) in one view with shared helper methods (`get_booking()`) kept code organized and DRY. For complex pages with multiple responsibilities, base `View` class offers more control than generic views while maintaining clean structure.
+
+---
 
 ## Links
 
 - **Live Application:** [Axoelote Food Truck Webapp](https://axoelote-foodtruck-6de5775aa776.herokuapp.com/)
 - **GitHub Repository:** [axoelote-foodtruck-app](https://github.com/iliana-marquez/axoelote-foodtruck-app)
+- **Project Board:** [GitHub Projects](https://github.com/users/iliana-marquez/projects/13/views/1)
