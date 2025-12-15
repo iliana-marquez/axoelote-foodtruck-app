@@ -420,6 +420,34 @@ end_datetime__date__gte=target_date
 **Fix:** Add `onclick="event.stopPropagation()"` to actions `<td>` element.
 **Lesson:** When using row-level click handlers, always stop propagation on interactive child elements.
 
+
+**Timezone Handling Decision**
+Manual testing of the booking edit feature revealed timezone inconsistencies:
+- Availability status showed "Available" for dates with existing events
+- Form validation error messages displayed booking times 1 hour earlier than the summary display
+- Same event showed different times in different parts of the UI
+
+Automated tests confirmed the root cause: Django with `USE_TZ = True` stores datetimes in UTC, but slot calculations created some datetimes in Vienna timezone. When mixed, availability windows calculated incorrectly and timezone comparisons failed silently.
+
+```
+Slot start: 2026-01-08 00:00:00+01:00 (Vienna)
+Slot end:   2026-01-09 01:00:00+00:00 (UTC)  ← Mixed timezones!
+```
+
+**Decision: Disable timezone support (`USE_TZ = False`)**
+
+| Factor | With `USE_TZ = True` | With `USE_TZ = False` |
+|--------|---------------------|----------------------|
+| Storage | UTC in database | Local time in database |
+| Complexity | High (conversions everywhere) | Low (WYSIWYG) |
+| Admin display | Shows UTC (confusing) | Shows Vienna (correct) |
+| Multi-timezone | Ready | Would need migration |
+| App scope | Overkill for Vienna-only | Perfect fit |
+
+**Rationale:**
+For a single-location food truck app serving Vienna, timezone complexity adds no value and introduces bugs. The pragmatic choice is naive datetimes until multi-region support is needed.
+
+
 ## Known Limitations
 
 ### Double-booking Prevention
@@ -488,6 +516,11 @@ Events spanning midnight (e.g., wedding 18:00-02:00) currently override the foll
 
 ### Display Logic Edge Cases
 When multiple approved bookings exist for the same day, only the first booking displays in the schedule. The system doesn't break but could provide more complete information.
+
+**Multi-Timezone Support (for V2)**
+
+When expanding to multiple cities/countries, re-enable `USE_TZ = True` and implement proper timezone handling: add timezone field to Client/Venue model, create timezone conversion utilities, update all datetime displays and slot calculations to normalize times consistently.
+
 
 ## Installation & Setup
 
