@@ -37,6 +37,7 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
 - [Testing](#testing)
   - [User Story Testing](#user-story-testing)
   - [Automated Testing](#automated-testing)
+  - [Validation](#validation)
 - [Known Limitations](#known-limitations)
 - [Installation & Setup](#installation--setup)
   - [Local Development](#local-development)
@@ -527,8 +528,6 @@ Each user story was validated through manual testing with documented results.
 
 ### Automated Testing
 
-### Automated Testing
-
 **Test Summary**
 ```bash
 python manage.py test
@@ -556,31 +555,28 @@ Comprehensive testing of the booking slot system:
 | NaiveDatetimeTestCase | 2 | Timezone handling (USE_TZ=False) |
 
 Automated Test Results
-![Automated Test Results](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765798580/automated_test_terminal_fxskvz.png)
+[Automated Test Results](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765798580/automated_test_terminal_fxskvz.png)
 
 
+### Validation
 
+**Code Validation**
 
-**Comprehensive Test Coverage**
-```bash
-# Form Testing
-python manage.py test booking.test_forms  # 15 passing tests
-python manage.py test booking.test_views  # 10 passing tests
+| Language | Validator | Result |
+|----------|-----------|--------|
+| HTML | W3C Validator | ✅ Pass |
+| CSS | Jigsaw Validator | ✅ Pass |
+| JavaScript | JSHint | ✅ Pass |
+| Python | PEP8 / Flake8 | ✅ Pass |
 
-# Test Categories Covered:
-- Form validation (all business rules)
-- Authentication requirements  
-- File upload handling
-- Edge cases (time conflicts, guest minimums)
-- Success/error message integration
-```
+**Accessibility**
 
-**Manual Testing Scenarios**
-- Multi-day event display validation
-- Schedule priority logic verification
-- Admin panel functionality across user roles
-- Mobile responsiveness testing
-- File upload integration with Cloudinary
+| Tool | Score | Notes |
+|------|-------|-------|
+| Lighthouse | XX/100 | Accessibility score |
+| WAVE | X errors | Details |
+
+![Lighthouse Score](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765799232/lighthouse_validation_bookings_v6hdci.png)
 
 ### Critical Bug Fixes
 
