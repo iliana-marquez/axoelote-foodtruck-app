@@ -658,7 +658,38 @@ The "Clear" link on the booking request form has no functionality. Intended to r
 Links outside the navbar, buttons, and footer lack consistent styling. Visual polish needed for inline text links throughout the application.
 
 ---
+## Deployment
 
+### Heroku Deployment Steps
+
+The application is deployed via Heroku Dashboard:
+
+1. Create new app on [Heroku Dashboard](https://dashboard.heroku.com/)
+2. Connect GitHub repository under "Deploy" tab
+3. Add PostgreSQL under "Resources" → "Add-ons"
+4. Configure environment variables under "Settings" → "Config Vars":
+   - `SECRET_KEY`
+   - `CLOUDINARY_URL`
+   - `DATABASE_URL` (auto-set by PostgreSQL add-on)
+   - `DEBUG` = `False`
+5. Deploy branch under "Deploy" → "Manual Deploy"
+6. Run migrations via "More" → "Run Console": `python manage.py migrate`
+
+**Live Application:** [axoelote-foodtruck.herokuapp.com](https://axoelote-foodtruck-6de5775aa776.herokuapp.com/)
+
+### Local Development
+```bash
+git clone https://github.com/iliana-marquez/axoelote-foodtruck-app.git
+cd axoelote-foodtruck-app
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env  # Configure your values
+python manage.py migrate
+python manage.py runserver
+```
+
+---
 
 **Future Enhancement:**  
 - Implement database-level constraints and comprehensive conflict checking across all booking and event crveation methods.  
