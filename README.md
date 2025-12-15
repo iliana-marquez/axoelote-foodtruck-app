@@ -15,11 +15,10 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
 - [Project Overview](#project-overview)
   - [User Stories](#user-stories)
   - [Key Features](#key-features)
+- [UX Design](#ux-design)
+  - [Wireframes](#wireframes)
+  - [Design Decisions](#design-decisions)
 - [Technology Stack](#technology-stack)
-  - [Backend](#backend)
-  - [Development Tools](#development-tools)
-  - [Frontend](#frontend)
-  - [Deployment](#deployment)
 - [Database Schema (ERD)](#database-schema-erd)
     - [Model Realationships](#model-relationships)
     - [BookingRequest Table](#bookingrequest-table)
@@ -182,11 +181,6 @@ This approach reduces cognitive load by showing relevant options only when neede
 | Environment Variables | Secure configuration management |
 
 ---
-
-### Deployment
-- **Heroku**: Cloud platform hosting
-- **WhiteNoise**: Static file serving
-- **Environment Variables**: Secure configuration management
 
 ## Database Schema (ERD)
 
