@@ -482,7 +482,45 @@ class BookingDetailView(LoginRequiredMixin, View):
 | Cancel Modal | `includes/cancel_modal.html` | booking_detail, bookings list |
 | Calendar Picker | Flatpickr inline | booking form, booking edit |
 
-### Testing Strategy
+---
+
+## Testing
+
+### User Story Testing
+
+Each user story was validated through manual testing with documented results.
+
+**Customer User Stories**
+
+| User Story | Test Case | Steps | Expected | Result |
+|------------|-----------|-------|----------|--------|
+| See where food truck is today | View homepage | Navigate to homepage | Today's location displayed | ✅ Pass |
+| Book food truck for private event | Submit booking | Fill form with valid data, submit | Success message, booking created | ✅ Pass |
+| Know booking rules before submitting | View booking form | Navigate to booking form | Rules displayed (70 guests, 15 days advance) | ✅ Pass |
+| Upload event photos | Add photo to booking | Select image file, submit form | Image uploaded to Cloudinary | ✅ Pass |
+| Log in securely | Authentication flow | Register, logout, login | Account created, session managed | ✅ Pass |
+| View my bookings | Access dashboard | Navigate to /booking/bookings/ | List of own bookings displayed | ✅ Pass |
+| Edit my booking | Modify booking details | Change title, save | "Booking updated successfully" | ✅ Pass |
+| Cancel my booking | Delete booking | Click cancel, confirm modal | "{title} has been deleted" | ✅ Pass |
+| See real-time availability | Select date on calendar | Pick date in booking edit | Availability window displayed | ✅ Pass |
+
+**Admin User Stories**
+
+| User Story | Test Case | Steps | Expected | Result |
+|------------|-----------|-------|----------|--------|
+| Create and manage events | Admin panel | Create event at /admin/ | Event appears in schedule | ✅ Pass |
+| Address validation for events | Create event without address | Submit open event without location | Validation error displayed | ✅ Pass |
+| See events chronologically | View admin event list | Access events in admin | Ordered by start_datetime | ✅ Pass |
+| Filter and search events | Use admin filters | Filter by type, status, date | Filtered results displayed | ✅ Pass |
+| Control staff access | Check permissions | Non-staff user tries admin | Access denied | ✅ Pass |
+
+**Visitor User Stories**
+
+| User Story | Test Case | Steps | Expected | Result |
+|------------|-----------|-------|----------|--------|
+| Understand app purpose | View landing page | Navigate to homepage | Clear hero section with purpose | ✅ Pass |
+| View dynamic schedule | Check schedule section | View "Where to find me" | Today's event or regular schedule | ✅ Pass |
+| Know when truck is closed | Check closed day | View schedule on closed day | "Closed" status displayed | ✅ Pass |
 
 **Comprehensive Test Coverage**
 ```bash
