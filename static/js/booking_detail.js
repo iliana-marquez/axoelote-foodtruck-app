@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedEndTime: null,
         endsNextDay: false,
         availableSlots: [],
+        currentSlot: null,  
         calendar: null
     };
     
@@ -276,58 +277,134 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function handleSlotsResponse(data, dateStr) {
         if (data.has_availability && state.availableSlots.length > 0) {
+            const slot = state.availableSlots[0];
+            state.currentSlot = slot;
+
+            // Show window times
+            const windowEnd = slot.crosses_midnight
+                ? `${slot.end_time} (next day)`
+                : slot.end_time;
+
             elements.availabilityStatus.innerHTML = `
-                <span class="text-success">
-                    <i class="bi bi-check-circle me-1"></i>
-                    ${state.availableSlots.length} slot${state.availableSlots.length > 1 ? 's' : ''} available
-                </span>
+                <div class="text-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <strong>Available!</strong>
+                </div>
+                <small class="text-muted d-block mt-1">
+                    Window: ${slot.start_time} - ${windowEnd}
+                </small>
             `;
-            
-            populateTimeDropdowns();
+
+            populateTimeDropdowns(slot);  // Pass slot
             elements.timeFields.style.display = 'block';
-            
+
+            // Show next day checkbox if crosses midnight
+            if (slot.crosses_midnight) {
+                elements.nextDayWrapper.style.display = 'block';
+            } else {
+                elements.nextDayWrapper.style.display = 'none';
+                elements.nextDayCheckbox.checked = false;
+            }
+
+            // Pre-select current times if on same date
             if (dateStr === state.appliedDate) {
                 preselectCurrentTimes();
             }
         } else {
+            state.currentSlot = null;
+
             elements.availabilityStatus.innerHTML = `
-                <span class="text-danger">
-                    <i class="bi bi-x-circle me-1"></i>
-                    No availability on this date
-                </span>
+                <div class="text-danger">
+                    <i class="bi bi-x-circle-fill me-2"></i>
+                    <strong>Fully booked</strong>
+                </div>
+                <small class="text-muted d-block mt-1">
+                    Please select another date
+                </small>
             `;
             elements.timeFields.style.display = 'none';
+            elements.newSelectionPreview.style.display = 'none';
         }
     }
-    
-    function populateTimeDropdowns() {
-        elements.startTimeSelect.innerHTML = '<option value="">Select start time</option>';
-        elements.endTimeSelect.innerHTML = '<option value="">Select end time</option>';
-        
-        const times = new Set();
-        
-        state.availableSlots.forEach(slot => {
-            let currentTime = slot.start;
-            while (currentTime <= slot.end) {
-                times.add(currentTime);
-                currentTime = addMinutes(currentTime, 30);
+
+    function populateTimeDropdowns(slot) {
+        if (!slot) return;
+
+        const slotStart = slot.start_time;
+        const slotEnd = slot.end_time;
+
+        // Generate all 30-min intervals
+        const allTimes = [];
+        for (let h = 0; h < 24; h++) {
+            for (let m = 0; m < 60; m += 30) {
+                allTimes.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
             }
+        }
+
+        // === START TIME OPTIONS (filtered to slot window) ===
+        let startOptions = [];
+        if (slot.crosses_midnight) {
+            startOptions = allTimes.filter(t => t >= slotStart);
+        } else {
+            startOptions = allTimes.filter(t => t >= slotStart && t < slotEnd);
+        }
+
+        elements.startTimeSelect.innerHTML = '<option value="">Select start time</option>';
+        startOptions.forEach(time => {
+            const option = document.createElement('option');
+            option.value = time;
+            option.textContent = time;
+            elements.startTimeSelect.appendChild(option);
         });
-        
-        Array.from(times).sort().forEach(time => {
-            elements.startTimeSelect.innerHTML += `<option value="${time}">${time}</option>`;
-            elements.endTimeSelect.innerHTML += `<option value="${time}">${time}</option>`;
-        });
+
+        // === END TIME OPTIONS (filtered to slot window) ===
+        elements.endTimeSelect.innerHTML = '<option value="">Select end time</option>';
+
+        if (slot.crosses_midnight) {
+            const sameDayAfterStart = allTimes.filter(t => t > slotStart);
+            const nextDayTimes = allTimes.filter(t => t <= slotEnd);
+
+            sameDayAfterStart.forEach(time => {
+                const option = document.createElement('option');
+                option.value = time;
+                option.textContent = time;
+                elements.endTimeSelect.appendChild(option);
+            });
+
+            if (nextDayTimes.length > 0) {
+                const separator = document.createElement('option');
+                separator.disabled = true;
+                separator.textContent = '── Next day ──';
+                elements.endTimeSelect.appendChild(separator);
+
+                nextDayTimes.forEach(time => {
+                    const option = document.createElement('option');
+                    option.value = time;
+                    option.textContent = `${time} (next day)`;
+                    option.dataset.nextDay = 'true';
+                    elements.endTimeSelect.appendChild(option);
+                });
+            }
+        } else {
+            const endOptions = allTimes.filter(t => t > slotStart && t <= slotEnd);
+            endOptions.forEach(time => {
+                const option = document.createElement('option');
+                option.value = time;
+                option.textContent = time;
+                elements.endTimeSelect.appendChild(option);
+            });
+        }
+
+        // === PRE-SELECT SLOT START ONLY (not original times) ===
+        if (startOptions.length > 0) {
+            elements.startTimeSelect.value = startOptions[0];
+            state.selectedStartTime = startOptions[0];
+        }
+
+        // End time: leave empty for user to choose
+        state.selectedEndTime = null;
     }
-    
-    function addMinutes(timeStr, minutes) {
-        const [h, m] = timeStr.split(':').map(Number);
-        const totalMinutes = h * 60 + m + minutes;
-        const newH = Math.floor(totalMinutes / 60) % 24;
-        const newM = totalMinutes % 60;
-        return `${newH.toString().padStart(2, '0')}:${newM.toString().padStart(2, '0')}`;
-    }
-    
+
     function preselectCurrentTimes() {
         const startOptions = Array.from(elements.startTimeSelect.options).map(o => o.value);
         const endOptions = Array.from(elements.endTimeSelect.options).map(o => o.value);
@@ -340,10 +417,6 @@ document.addEventListener('DOMContentLoaded', function() {
             elements.endTimeSelect.value = state.appliedEndTime;
             state.selectedEndTime = state.appliedEndTime;
         }
-        
-        if (state.selectedStartTime && state.selectedEndTime) {
-            updatePreview();
-        }
     }
     
     function onTimeChange() {
@@ -354,21 +427,51 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!state.selectedStartTime || !state.selectedEndTime) {
             elements.newSelectionPreview.style.display = 'none';
             elements.applyBtn.disabled = true;
+            elements.timeError.style.display = 'none';
             return;
         }
         
-        if (state.selectedEndTime <= state.selectedStartTime && !state.endsNextDay) {
-            elements.nextDayWrapper.style.display = 'block';
-        } else {
-            elements.nextDayWrapper.style.display = 'none';
+        // Build dates for validation
+        const startDate = new Date(state.selectedDate);
+        const endDate = new Date(state.selectedDate);
+        
+        if (state.endsNextDay) {
+            endDate.setDate(endDate.getDate() + 1);
         }
         
+        const [startH, startM] = state.selectedStartTime.split(':');
+        const [endH, endM] = state.selectedEndTime.split(':');
+        startDate.setHours(parseInt(startH), parseInt(startM), 0, 0);
+        endDate.setHours(parseInt(endH), parseInt(endM), 0, 0);
+        
+        // Validate end after start
+        if (endDate <= startDate) {
+            elements.timeError.textContent = 'End time must be after start time. Check "Ends next day" for overnight events.';
+            elements.timeError.style.display = 'block';
+            elements.newSelectionPreview.style.display = 'none';
+            elements.applyBtn.disabled = true;
+            return;
+        }
+        
+        // Valid selection
         elements.timeError.style.display = 'none';
         updatePreview();
     }
     
     function updatePreview() {
         if (!state.selectedDate || !state.selectedStartTime || !state.selectedEndTime) {
+            return;
+        }
+
+        // Check if there are actual changes from original
+        const noChanges = 
+            state.selectedDate === state.originalDate &&
+            state.selectedStartTime === state.originalStartTime &&
+            state.selectedEndTime === state.originalEndTime;
+        
+        if (noChanges) {
+            elements.newSelectionPreview.style.display = 'none';
+            elements.applyBtn.disabled = true;
             return;
         }
         
