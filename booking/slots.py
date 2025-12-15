@@ -6,10 +6,11 @@ Engagements = approved/pending Bookings or active Events
 
 Slots can span across midnight for overnight bookings
 (e.g. 20:00 - 02:00 next day).
+
+Updated for USE_TZ=False (naive datetimes)
 """
 
 from datetime import datetime, timedelta, time
-from django.utils import timezone
 from django.db.models import Q
 from booking.models import Booking
 from .rules import MINIMUM_GAP_HOURS
@@ -49,7 +50,7 @@ def get_engagements_for_date_range(start_date, end_date):
 
     # get active events
     events = Event.objects.filter(
-        status__in=['pending', 'approved']
+        status__in=['active']
         ).filter(
             Q(start_datetime__date__range=[start_date, end_date]) |
             Q(end_datetime__date__range=[start_date, end_date])
@@ -83,20 +84,12 @@ def get_available_slots(target_date, exclude_booking_id=None):
     min_gap = timedelta(hours=MINIMUM_GAP_HOURS)
 
     # search window: day before through day after (3 days)
-    search_start = timezone.make_aware(
-        datetime.combine(target_date - timedelta(days=1), time(0, 0))
-    )
-    search_end = timezone.make_aware(
-        datetime.combine(target_date + timedelta(days=2), time(0, 0))
-    )
+    search_start = datetime.combine(target_date - timedelta(days=1), time(0, 0))
+    search_end = datetime.combine(target_date + timedelta(days=2), time(0, 0))
 
     # target_date boundaries for filtering relevant slots
-    day_start = timezone.make_aware(
-        datetime.combine(target_date, time(0, 0))
-    )
-    day_end = timezone.make_aware(
-        datetime.combine(target_date + timedelta(days=1), time(0, 0))
-    )
+    day_start = datetime.combine(target_date, time(0, 0))
+    day_end = datetime.combine(target_date + timedelta(days=1), time(0, 0))
 
     # get all engagements in search window
     engagements = get_engagements_for_date_range(
@@ -106,6 +99,10 @@ def get_available_slots(target_date, exclude_booking_id=None):
 
     # exclude current booking if editing
     if exclude_booking_id:
+        # convert to int if string (from URL query param)
+        if isinstance(exclude_booking_id, str):
+            exclude_booking_id = int(exclude_booking_id)
+
         booking = Booking.objects.filter(
                 pk=exclude_booking_id
             ).values_list(
@@ -260,6 +257,11 @@ def check_slot_available(
 
     # exclude current booking if editing
     if exclude_booking_id:
+
+        # cnvert to int if string (from URL query param)
+        if isinstance(exclude_booking_id, str):
+            exclude_booking_id = int(exclude_booking_id)
+
         booking = Booking.objects.filter(
             pk=exclude_booking_id
         ).values_list(
