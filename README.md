@@ -560,6 +560,39 @@ When multiple approved bookings exist for the same day, only the first booking d
 When expanding to multiple cities/countries, re-enable `USE_TZ = True` and implement proper timezone handling: add timezone field to Client/Venue model, create timezone conversion utilities, update all datetime displays and slot calculations to normalize times consistently.
 
 
+### Hard Delete for Booking from customer's side
+
+For assessment purposes, the cancel/delete functionality performs a hard delete, permanently removing the booking record from the database. 
+
+| Action | Result |
+|--------|--------|
+| User clicks Cancel | Modal confirmation appears |
+| User confirms | Record deleted from database |
+| Feedback | Success message displayed |
+| Redirect | Returns to bookings list |
+
+**V2 Enhancement: Soft Delete**
+
+For production business use, soft delete is preferred for audit trails and refund processing:
+
+| User Action | Status Change | Visibility |
+|-------------|---------------|------------|
+| Customer cancels | `status='cancelled_by_customer'` | Hidden from customer, visible to admin |
+| Site owner cancels | `status='cancelled_by_admin'` | Hidden from customer, visible to admin |
+
+Benefits of soft delete:
+- Preserves booking history for reporting
+- Enables refund tracking and processing
+- Audit trail for disputes
+- Admin can review cancellation patterns
+
+Implementation requires:
+- Add `cancelled_by` field (customer/admin)
+- Add `cancelled_at` timestamp
+- Filter cancelled bookings from customer views
+- Admin dashboard for cancelled bookings
+
+
 ## Installation & Setup
 
 ### Local Development
