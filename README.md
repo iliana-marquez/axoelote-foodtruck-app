@@ -447,6 +447,35 @@ Slot end:   2026-01-09 01:00:00+00:00 (UTC)  ← Mixed timezones!
 **Rationale:**
 For a single-location food truck app serving Vienna, timezone complexity adds no value and introduces bugs. The pragmatic choice is naive datetimes until multi-region support is needed.
 
+### Slot Validation Bug
+**Problem:** Editing a booking's date/time failed with false conflict errors.
+
+**Symptoms identified through manual and automated testing:**
+- Own booking showed "Fully booked" when trying to edit same date
+- Form validation rejected edits with "Conflicts with existing engagement"
+- Events with `status='active'` not detected in availability check
+- Timezone inconsistencies caused 1-hour display differences
+
+**Root causes:**
+| File | Issue |
+|------|-------|
+| `settings.py` | `USE_TZ=True` caused UTC/Vienna mixing |
+| `views.py` | API ignored `?exclude=` query parameter |
+| `slots.py` | Event filter wrong, exclude_id not converted from string |
+| `forms.py` | `clean()` didn't exclude own booking on edit |
+
+**Fixes applied:**
+- **settings.py:** Set `USE_TZ=False` for single-timezone app
+- **views.py:** Pass `exclude_id` from URL params to slot calculation
+- **slots.py:** Filter events by `status='active'`, convert string exclude_id to int
+- **forms.py:** Pass `self.instance.pk` as exclude_booking_id during validation
+
+**Testing:**
+- 24 automated tests covering slot calculation, exclusion logic, and API
+- Manual test cases for edit scenarios with/without conflicts
+
+**Lesson learned:** When implementing edit functionality, ensure validation logic accounts for the record being edited to prevent self-conflict false positives.
+
 
 ## Known Limitations
 
