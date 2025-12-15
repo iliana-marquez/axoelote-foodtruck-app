@@ -30,6 +30,7 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
   - [Booking Management System](#booking-management-system)
   - [Slot Availability System](#slot-availability-system)
   - [Authentication & Authorization](#authentication--authorization)
+- [Business Rules](#business-rules)
 - [Development Process](#development-process)
   - [Initial Setup & Architecture Decisions](#initial-setup--architecture-decisions)
   - [Model Development & Testing](#model-development--testing)
@@ -400,6 +401,30 @@ Navigation - Logged Out
 Navigation - Logged In
 ![Navigation - Logged In](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765796312/logged_out_navbar_ebd6aa.png)
 
+
+---
+
+## Business Rules
+
+Centralized business logic in `booking/rules.py`:
+
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| MINIMUM_ADVANCE_DAYS | 15 | Days required before event |
+| MINIMUM_GUESTS | 70 | Minimum guest count for profitability |
+| MINIMUM_GAP_HOURS | 10 | Hours between events for setup/cleanup |
+| FULL_EDIT_DAYS | 15 | Days before event for full edit access |
+| COSMETIC_EDIT_DAYS | 3 | Days before event for cosmetic edit |
+| CONTACT_EMAIL | - | Displayed when edits restricted |
+| CONTACT_PHONE | - | Displayed when edits restricted |
+
+**Why 70 guests minimum?**
+
+Business owner determined that private bookings are only profitable above this threshold, compared to regular street sales at weekly market location.
+
+**Why 10-hour gap?**
+
+Allows adequate time for cleanup, rest, travel, and setup between consecutive events.
 
 ---
 
