@@ -1,13 +1,13 @@
 """
 Tests for slot availability calculation.
 Covers engagements fetching, slot calculation, and exclude logic.
+
+Updated for USE_TZ=False (naive datetimes)
 """
 
 from datetime import date, time, datetime, timedelta
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from django.utils import timezone
-from django.urls import reverse
 from booking.models import Booking
 from booking.slots import (
     get_engagements_for_date_range,
@@ -28,6 +28,11 @@ class EngagementsTestCase(TestCase):
             username='testuser',
             password='testpass123'
         )
+        self.admin_user = User.objects.create_user(
+            username='adminuser',
+            password='testpass123',
+            is_staff=True
+        )
         
         # Target date for testing (far enough in future)
         self.target_date = date.today() + timedelta(days=MINIMUM_ADVANCE_DAYS + 10)
@@ -37,12 +42,8 @@ class EngagementsTestCase(TestCase):
         booking = Booking.objects.create(
             customer=self.user,
             event_title='Pending Booking',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(10, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(14, 0))
-            ),
+            start_datetime=datetime.combine(self.target_date, time(10, 0)),
+            end_datetime=datetime.combine(self.target_date, time(14, 0)),
             guest_count=100,
             status='pending'
         )
@@ -61,15 +62,11 @@ class EngagementsTestCase(TestCase):
         booking = Booking.objects.create(
             customer=self.user,
             event_title='Approved Booking',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(10, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(14, 0))
-            ),
+            start_datetime=datetime.combine(self.target_date, time(10, 0)),
+            end_datetime=datetime.combine(self.target_date, time(14, 0)),
             guest_count=100,
             status='approved',
-            approved_at=timezone.now()
+            approved_at=datetime.now()
         )
         
         engagements = get_engagements_for_date_range(
@@ -84,12 +81,8 @@ class EngagementsTestCase(TestCase):
         Booking.objects.create(
             customer=self.user,
             event_title='Cancelled Booking',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(10, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(14, 0))
-            ),
+            start_datetime=datetime.combine(self.target_date, time(10, 0)),
+            end_datetime=datetime.combine(self.target_date, time(14, 0)),
             guest_count=100,
             status='cancelled'
         )
@@ -104,14 +97,12 @@ class EngagementsTestCase(TestCase):
     def test_fetches_active_events(self):
         """Active events should be included in engagements."""
         event = Event.objects.create(
-            title='Test Event',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(18, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(22, 0))
-            ),
-            status='approved'
+            admin=self.admin_user,
+            event_title='Test Event',
+            event_type='private',
+            start_datetime=datetime.combine(self.target_date, time(18, 0)),
+            end_datetime=datetime.combine(self.target_date, time(22, 0)),
+            status='active'
         )
         
         engagements = get_engagements_for_date_range(
@@ -128,27 +119,21 @@ class EngagementsTestCase(TestCase):
         Booking.objects.create(
             customer=self.user,
             event_title='Test Booking',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(10, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(14, 0))
-            ),
+            start_datetime=datetime.combine(self.target_date, time(10, 0)),
+            end_datetime=datetime.combine(self.target_date, time(14, 0)),
             guest_count=100,
             status='approved',
-            approved_at=timezone.now()
+            approved_at=datetime.now()
         )
         
         # Create event
         Event.objects.create(
-            title='Test Event',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(18, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(22, 0))
-            ),
-            status='approved'
+            admin=self.admin_user,
+            event_title='Test Event',
+            event_type='private',
+            start_datetime=datetime.combine(self.target_date, time(18, 0)),
+            end_datetime=datetime.combine(self.target_date, time(22, 0)),
+            status='active'
         )
         
         engagements = get_engagements_for_date_range(
@@ -168,6 +153,11 @@ class AvailableSlotsTestCase(TestCase):
             username='testuser',
             password='testpass123'
         )
+        self.admin_user = User.objects.create_user(
+            username='adminuser',
+            password='testpass123',
+            is_staff=True
+        )
         self.target_date = date.today() + timedelta(days=MINIMUM_ADVANCE_DAYS + 10)
         
     def test_fully_available_when_no_engagements(self):
@@ -175,20 +165,21 @@ class AvailableSlotsTestCase(TestCase):
         slots = get_available_slots(self.target_date)
         
         self.assertGreater(len(slots), 0)
-        # Should have a slot covering the day
         
     def test_no_availability_when_fully_booked(self):
         """Day with all-day event should return no slots."""
         # Create event covering entire day plus gap requirements
         Event.objects.create(
-            title='All Day Event',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date - timedelta(days=1), time(12, 0))
+            admin=self.admin_user,
+            event_title='All Day Event',
+            event_type='private',
+            start_datetime=datetime.combine(
+                self.target_date - timedelta(days=1), time(12, 0)
             ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date + timedelta(days=1), time(12, 0))
+            end_datetime=datetime.combine(
+                self.target_date + timedelta(days=1), time(12, 0)
             ),
-            status='approved'
+            status='active'
         )
         
         slots = get_available_slots(self.target_date)
@@ -201,21 +192,15 @@ class AvailableSlotsTestCase(TestCase):
         Booking.objects.create(
             customer=self.user,
             event_title='Midday Booking',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(12, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(16, 0))
-            ),
+            start_datetime=datetime.combine(self.target_date, time(12, 0)),
+            end_datetime=datetime.combine(self.target_date, time(16, 0)),
             guest_count=100,
             status='approved',
-            approved_at=timezone.now()
+            approved_at=datetime.now()
         )
         
         slots = get_available_slots(self.target_date)
         
-        # Should have slots before and/or after the booking
-        # (depending on gap requirements)
         print(f"\nPartial availability test:")
         print(f"Target date: {self.target_date}")
         print(f"Slots returned: {slots}")
@@ -238,12 +223,8 @@ class ExcludeBookingTestCase(TestCase):
         self.booking = Booking.objects.create(
             customer=self.user,
             event_title='Booking To Edit',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(10, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(14, 0))
-            ),
+            start_datetime=datetime.combine(self.target_date, time(10, 0)),
+            end_datetime=datetime.combine(self.target_date, time(14, 0)),
             guest_count=100,
             status='pending'
         )
@@ -255,9 +236,6 @@ class ExcludeBookingTestCase(TestCase):
         print(f"\nWithout exclude:")
         print(f"Booking: {self.booking.start_datetime} - {self.booking.end_datetime}")
         print(f"Slots: {slots}")
-        
-        # The exact slot time should not be available
-        # (blocked by own booking)
         
     def test_own_booking_available_with_exclude(self):
         """With exclude, own booking's slot should be available."""
@@ -273,21 +251,30 @@ class ExcludeBookingTestCase(TestCase):
         # Should have availability now
         self.assertGreater(len(slots), 0)
         
+    def test_own_booking_available_with_exclude_as_string(self):
+        """With exclude as string (from URL), own booking's slot should be available."""
+        slots = get_available_slots(
+            self.target_date,
+            exclude_booking_id=str(self.booking.pk)  # String like from URL param
+        )
+        
+        print(f"\nWith exclude as string (ID='{self.booking.pk}'):")
+        print(f"Slots: {slots}")
+        
+        # Should have availability now
+        self.assertGreater(len(slots), 0)
+        
     def test_exclude_only_affects_own_booking(self):
         """Exclude should not affect other bookings."""
         # Create another booking on same day
         other_booking = Booking.objects.create(
             customer=self.user,
             event_title='Other Booking',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(18, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(22, 0))
-            ),
+            start_datetime=datetime.combine(self.target_date, time(18, 0)),
+            end_datetime=datetime.combine(self.target_date, time(22, 0)),
             guest_count=100,
             status='approved',
-            approved_at=timezone.now()
+            approved_at=datetime.now()
         )
         
         slots = get_available_slots(
@@ -299,8 +286,6 @@ class ExcludeBookingTestCase(TestCase):
         print(f"Own booking: {self.booking.start_datetime} - {self.booking.end_datetime}")
         print(f"Other booking: {other_booking.start_datetime} - {other_booking.end_datetime}")
         print(f"Slots: {slots}")
-        
-        # Other booking should still block its time
 
 
 class SlotsAPITestCase(TestCase):
@@ -343,12 +328,8 @@ class SlotsAPITestCase(TestCase):
         booking = Booking.objects.create(
             customer=self.user,
             event_title='Test Booking',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(10, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(14, 0))
-            ),
+            start_datetime=datetime.combine(self.target_date, time(10, 0)),
+            end_datetime=datetime.combine(self.target_date, time(14, 0)),
             guest_count=100,
             status='pending'
         )
@@ -367,7 +348,7 @@ class SlotsAPITestCase(TestCase):
         print(f"Without exclude: has_availability={data_without['has_availability']}, slots={len(data_without['slots'])}")
         print(f"With exclude: has_availability={data_with['has_availability']}, slots={len(data_with['slots'])}")
         
-        # With exclude should have more availability (or equal if day was empty anyway)
+        # With exclude should have availability
         self.assertTrue(data_with['has_availability'])
         
     def test_api_rejects_past_dates(self):
@@ -381,8 +362,136 @@ class SlotsAPITestCase(TestCase):
         self.assertFalse(data['success'])
 
 
-class TimezoneTestCase(TestCase):
-    """Test timezone handling in slot calculation."""
+class CheckSlotAvailableTestCase(TestCase):
+    """Test check_slot_available validation function."""
+    
+    def setUp(self):
+        """Create test user."""
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpass123'
+        )
+        self.admin_user = User.objects.create_user(
+            username='adminuser',
+            password='testpass123',
+            is_staff=True
+        )
+        self.target_date = date.today() + timedelta(days=MINIMUM_ADVANCE_DAYS + 10)
+        
+    def test_returns_none_when_available(self):
+        """Should return None when slot is available."""
+        start = datetime.combine(self.target_date, time(10, 0))
+        end = datetime.combine(self.target_date, time(14, 0))
+        
+        result = check_slot_available(start, end)
+        
+        self.assertIsNone(result)
+        
+    def test_returns_error_when_conflict(self):
+        """Should return error message when slot conflicts."""
+        # Create existing booking
+        Booking.objects.create(
+            customer=self.user,
+            event_title='Existing Booking',
+            start_datetime=datetime.combine(self.target_date, time(12, 0)),
+            end_datetime=datetime.combine(self.target_date, time(16, 0)),
+            guest_count=100,
+            status='approved',
+            approved_at=datetime.now()
+        )
+        
+        # Try to book overlapping slot
+        start = datetime.combine(self.target_date, time(14, 0))
+        end = datetime.combine(self.target_date, time(18, 0))
+        
+        result = check_slot_available(start, end)
+        
+        self.assertIsNotNone(result)
+        self.assertIn('Conflicts', result)
+        
+    def test_respects_minimum_gap(self):
+        """Should enforce minimum gap between bookings."""
+        # Create existing booking
+        Booking.objects.create(
+            customer=self.user,
+            event_title='Existing Booking',
+            start_datetime=datetime.combine(self.target_date, time(12, 0)),
+            end_datetime=datetime.combine(self.target_date, time(14, 0)),
+            guest_count=100,
+            status='approved',
+            approved_at=datetime.now()
+        )
+        
+        # Try to book right after (within gap period)
+        start = datetime.combine(self.target_date, time(15, 0))  # Only 1 hour gap
+        end = datetime.combine(self.target_date, time(18, 0))
+        
+        result = check_slot_available(start, end)
+        
+        self.assertIsNotNone(result)
+        self.assertIn(str(MINIMUM_GAP_HOURS), result)
+        
+    def test_exclude_own_booking(self):
+        """Should exclude own booking when editing."""
+        booking = Booking.objects.create(
+            customer=self.user,
+            event_title='Booking To Edit',
+            start_datetime=datetime.combine(self.target_date, time(10, 0)),
+            end_datetime=datetime.combine(self.target_date, time(14, 0)),
+            guest_count=100,
+            status='pending'
+        )
+        
+        # Same slot should be available when excluding own booking
+        start = datetime.combine(self.target_date, time(10, 0))
+        end = datetime.combine(self.target_date, time(14, 0))
+        
+        result = check_slot_available(start, end, exclude_booking_id=booking.pk)
+        
+        self.assertIsNone(result)
+        
+    def test_exclude_as_string(self):
+        """Should handle exclude_booking_id as string."""
+        booking = Booking.objects.create(
+            customer=self.user,
+            event_title='Booking To Edit',
+            start_datetime=datetime.combine(self.target_date, time(10, 0)),
+            end_datetime=datetime.combine(self.target_date, time(14, 0)),
+            guest_count=100,
+            status='pending'
+        )
+        
+        start = datetime.combine(self.target_date, time(10, 0))
+        end = datetime.combine(self.target_date, time(14, 0))
+        
+        # Pass as string (like from URL param)
+        result = check_slot_available(start, end, exclude_booking_id=str(booking.pk))
+        
+        self.assertIsNone(result)
+        
+    def test_conflicts_with_events(self):
+        """Should detect conflicts with events."""
+        Event.objects.create(
+            admin=self.admin_user,
+            event_title='Existing Event',
+            event_type='private',
+            start_datetime=datetime.combine(self.target_date, time(18, 0)),
+            end_datetime=datetime.combine(self.target_date, time(22, 0)),
+            status='active'
+        )
+        
+        # Try to book overlapping with event
+        start = datetime.combine(self.target_date, time(16, 0))
+        end = datetime.combine(self.target_date, time(20, 0))
+        
+        result = check_slot_available(start, end)
+        
+        self.assertIsNotNone(result)
+        self.assertIn('Conflicts', result)
+
+
+class NaiveDatetimeTestCase(TestCase):
+    """Test that naive datetimes work correctly with USE_TZ=False."""
     
     def setUp(self):
         """Create test user."""
@@ -392,17 +501,16 @@ class TimezoneTestCase(TestCase):
         )
         self.target_date = date.today() + timedelta(days=MINIMUM_ADVANCE_DAYS + 10)
         
-    def test_booking_times_are_timezone_aware(self):
-        """Bookings should store timezone-aware datetimes."""
+    def test_booking_stores_naive_datetime(self):
+        """Bookings should store naive datetimes."""
+        start = datetime.combine(self.target_date, time(10, 0))
+        end = datetime.combine(self.target_date, time(14, 0))
+        
         booking = Booking.objects.create(
             customer=self.user,
-            event_title='TZ Test',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(10, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(14, 0))
-            ),
+            event_title='Naive TZ Test',
+            start_datetime=start,
+            end_datetime=end,
             guest_count=100,
             status='pending'
         )
@@ -410,36 +518,32 @@ class TimezoneTestCase(TestCase):
         # Reload from DB
         booking.refresh_from_db()
         
-        print(f"\nTimezone test:")
-        print(f"start_datetime: {booking.start_datetime}")
-        print(f"start_datetime.tzinfo: {booking.start_datetime.tzinfo}")
-        print(f"end_datetime: {booking.end_datetime}")
-        print(f"Current timezone: {timezone.get_current_timezone()}")
+        print(f"\nNaive datetime test:")
+        print(f"Input start: {start}")
+        print(f"Stored start: {booking.start_datetime}")
+        print(f"Times match: {booking.start_datetime.replace(tzinfo=None) == start or booking.start_datetime == start}")
         
-        self.assertIsNotNone(booking.start_datetime.tzinfo)
-        self.assertIsNotNone(booking.end_datetime.tzinfo)
+        # Times should match (no UTC conversion)
+        self.assertEqual(booking.start_datetime.hour, 10)
+        self.assertEqual(booking.end_datetime.hour, 14)
         
     def test_slot_times_match_booking_times(self):
         """Slot window should correctly reflect booking times."""
-        booking = Booking.objects.create(
+        Booking.objects.create(
             customer=self.user,
-            event_title='Slot TZ Test',
-            start_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(12, 0))
-            ),
-            end_datetime=timezone.make_aware(
-                datetime.combine(self.target_date, time(16, 0))
-            ),
+            event_title='Slot Time Test',
+            start_datetime=datetime.combine(self.target_date, time(12, 0)),
+            end_datetime=datetime.combine(self.target_date, time(16, 0)),
             guest_count=100,
             status='approved',
-            approved_at=timezone.now()
+            approved_at=datetime.now()
         )
         
         slots = get_available_slots(self.target_date)
         formatted = format_slots_for_display(slots)
         
-        print(f"\nSlot TZ test:")
-        print(f"Booking: {booking.start_datetime} - {booking.end_datetime}")
+        print(f"\nSlot time match test:")
+        print(f"Booking: 12:00 - 16:00")
         print(f"Formatted slots:")
         for slot in formatted:
-            print(f"  {slot['start_time']} - {slot['end_time']} (crosses_midnight: {slot['crosses_midnight']})")
+            print(f"  {slot['start_time']} - {slot['end_time']}")
