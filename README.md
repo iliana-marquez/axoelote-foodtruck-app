@@ -578,108 +578,86 @@ Automated Test Results
 
 ![Lighthouse Score](https://res.cloudinary.com/dj2lk9daf/image/upload/v1765799232/lighthouse_validation_bookings_v6hdci.png)
 
-### Critical Bug Fixes
 
-**Multi-day Event Display Issue**
-```python
-# Problem: Events only showed on start date
-start_datetime__date=target_date
+---
+## Bug Fixes
 
-# Solution: Check for events active during target date  
-start_datetime__date__lte=target_date,
-end_datetime__date__gte=target_date
-```
+### Timezone Handling
 
-**72-hour Validation Logic**
-- New bookings: 72-hour minimum enforced
-- Existing booking updates: No time restrictions (admin flexibility)
-- Maintains business policy while enabling operational adjustments
+**Issue:** Manual testing revealed timezone inconsistencies - times displayed 1 hour differently across UI components.
 
-**Cloudinary Integration Fix**
-- Resolved urllib3 version conflict (1.26.20 → 1.26.15)
-- Proper CloudinaryField import consistency across models
-- Successful file upload testing in production environment
+**Root Cause:** Django with `USE_TZ=True` stores datetimes in UTC, but slot calculations used Vienna timezone. Mixed comparisons failed silently.
 
-## Bug Fixes:
-### Row Click vs Button Click Bug
-**Issue:** Clickable table rows captured button clicks, preventing Edit/Cancel actions.
-**Fix:** Add `onclick="event.stopPropagation()"` to actions `<td>` element.
-**Lesson:** When using row-level click handlers, always stop propagation on interactive child elements.
+**Solution:** Set `USE_TZ=False` for single-timezone Vienna-only app.
 
-
-**Timezone Handling Decision**
-Manual testing of the booking edit feature revealed timezone inconsistencies:
-- Availability status showed "Available" for dates with existing events
-- Form validation error messages displayed booking times 1 hour earlier than the summary display
-- Same event showed different times in different parts of the UI
-
-Automated tests confirmed the root cause: Django with `USE_TZ = True` stores datetimes in UTC, but slot calculations created some datetimes in Vienna timezone. When mixed, availability windows calculated incorrectly and timezone comparisons failed silently.
-
-```
-Slot start: 2026-01-08 00:00:00+01:00 (Vienna)
-Slot end:   2026-01-09 01:00:00+00:00 (UTC)  ← Mixed timezones!
-```
-
-**Decision: Disable timezone support (`USE_TZ = False`)**
-
-| Factor | With `USE_TZ = True` | With `USE_TZ = False` |
-|--------|---------------------|----------------------|
+| Factor | With USE_TZ=True | With USE_TZ=False |
+|--------|-----------------|-------------------|
 | Storage | UTC in database | Local time in database |
-| Complexity | High (conversions everywhere) | Low (WYSIWYG) |
-| Admin display | Shows UTC (confusing) | Shows Vienna (correct) |
-| Multi-timezone | Ready | Would need migration |
-| App scope | Overkill for Vienna-only | Perfect fit |
-
-**Rationale:**
-For a single-location food truck app serving Vienna, timezone complexity adds no value and introduces bugs. The pragmatic choice is naive datetimes until multi-region support is needed.
+| Complexity | High | Low (WYSIWYG) |
+| Admin display | Shows UTC | Shows Vienna |
+| App scope | Multi-timezone ready | Vienna-only (current need) |
 
 ### Slot Validation Bug
-**Problem:** Editing a booking's date/time failed with false conflict errors.
 
-**Symptoms identified through manual and automated testing:**
-- Own booking showed "Fully booked" when trying to edit same date
-- Form validation rejected edits with "Conflicts with existing engagement"
-- Events with `status='active'` not detected in availability check
-- Timezone inconsistencies caused 1-hour display differences
+**Issue:** Editing booking date/time showed false "Conflicts with existing engagement" errors.
 
-**Root causes:**
-| File | Issue |
-|------|-------|
-| `settings.py` | `USE_TZ=True` caused UTC/Vienna mixing |
-| `views.py` | API ignored `?exclude=` query parameter |
-| `slots.py` | Event filter wrong, exclude_id not converted from string |
-| `forms.py` | `clean()` didn't exclude own booking on edit |
+**Root Causes & Fixes:**
 
-**Fixes applied:**
-- **settings.py:** Set `USE_TZ=False` for single-timezone app
-- **views.py:** Pass `exclude_id` from URL params to slot calculation
-- **slots.py:** Filter events by `status='active'`, convert string exclude_id to int
-- **forms.py:** Pass `self.instance.pk` as exclude_booking_id during validation
+| File | Issue | Fix |
+|------|-------|-----|
+| settings.py | USE_TZ=True mixed timezones | Set USE_TZ=False |
+| views.py | API ignored ?exclude= param | Pass exclude_id to slot calculation |
+| slots.py | Event filter wrong | Filter by status='active' |
+| slots.py | exclude_id type mismatch | Convert string to int |
+| forms.py | clean() didn't exclude self | Pass self.instance.pk |
 
-**Testing:**
-- 24 automated tests covering slot calculation, exclusion logic, and API
-- Manual test cases for edit scenarios with/without conflicts
+### Row Click vs Button Click
 
-**Lesson learned:** When implementing edit functionality, ensure validation logic accounts for the record being edited to prevent self-conflict false positives.
+**Issue:** Clickable table rows captured button clicks, preventing Edit/Cancel actions.
 
+**Fix:** Add `onclick="event.stopPropagation()"` to actions `<td>` element.
 
-## Known Limitations
+---
 
-### Double-booking Prevention
-Currently, the system allows overlapping bookings and events to be created and edited through separate interfaces.  
-Although initial attempts were made to handle this at the form-validation level, the logic was not reliable and has not been implemented in production.  
+## Known Issues
 
-### Cross-Day Event Schedule Override
-Events spanning midnight (e.g., wedding 18:00-02:00) currently override the following day's regular schedule entirely. This may prevent normal operations when the food truck could realistically serve the regular schedule after late events conclude. 
+### Booking Request Form — Time Dropdowns Not Filtered
 
-###  Default Availability Window Display**
+The booking request form (new bookings) still displays all 24-hour time options regardless of availability window, while the booking detail page (edit mode) correctly filters dropdowns to show only valid times within the available slot.
 
-When a date has no engagements, the availability window displays as "00:00 - 00:00 (next day)". While technically correct (full 24h availability), this may confuse users into thinking late-night bookings aren't possible or that no slots are available.
+| Page | Time Dropdown Behavior |
+|------|----------------------|
+| booking_detail (edit) | ✅ Filtered to slot window |
+| booking_request (create) | ❌ Shows all 00:00 - 23:30 |
+
+**Impact:** Users creating new bookings can select invalid times that may conflict with existing engagements. Backend validation catches this on submit, but UX could be improved.
+
+**Status:** Backend validation prevents conflicts. Frontend filtering to be aligned with booking_detail behavior in future update.
+
+### Default Availability Window Display
+
+When a date has no engagements, the availability window displays as "00:00 - 00:00 (next day)". While technically correct (full 24h availability), this may confuse users.
 
 - **Current display:** "Available! Window: 00:00 - 00:00 (next day)"
-- **User perception:** Potentially misleading, may appear as "no availability" eventhough bookings can extend overnight if slot is available (manually posible by checking "Ends next day") under End time input
-- **Business rule:** Business owner allows any times as long as 10-hour gap exists between events
-- **Status:** UX improvement needed for clearer messaging or extended default window (e.g., 02:00 or 06:00 next day)
+- **User perception:** Potentially misleading, may appear as "no availability"
+- **Business rule:** Owner allows any times as long as 10-hour gap exists
+- **Status:** UX improvement needed for clearer messaging
+
+### Double-booking Prevention
+
+Currently, overlapping bookings can be created through admin interface. Slot validation only applies to customer-facing booking form.
+
+**Future Enhancement:** Database-level constraints and comprehensive conflict checking across all creation methods.
+
+### Clear Link Non-Functional
+
+The "Clear" link on the booking request form has no functionality. Intended to reset form fields but not implemented.
+
+### Inconsistent Link Styling
+
+Links outside the navbar, buttons, and footer lack consistent styling. Visual polish needed for inline text links throughout the application.
+
+---
 
 
 **Future Enhancement:**  
