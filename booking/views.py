@@ -115,6 +115,13 @@ class BookingDetailView(LoginRequiredMixin, View):
             messages.error(request, permissions['message'])
             return redirect('booking_detail', pk=pk)
 
+        # Handle delete
+        if request.POST.get('action') == 'cancel':
+            event_title = booking.event_title
+            booking.delete()
+            messages.success(request, f'"{event_title}" has been deleted.')
+            return redirect('bookings')
+
         form = BookingRequestForm(
             request.POST,
             request.FILES,
