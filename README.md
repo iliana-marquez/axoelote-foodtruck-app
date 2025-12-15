@@ -144,24 +144,44 @@ This approach reduces cognitive load by showing relevant options only when neede
 
 ---
 
-
 ## Technology Stack
 
 ### Backend
-- **Django 4.2.1**: Python web framework
-- **PostgreSQL**: Production database
-- **Django Allauth**: Authentication system
-- **Cloudinary**: Media file storage and optimization
+
+| Technology | Purpose |
+|------------|---------|
+| Django 4.2.1 | Python web framework |
+| PostgreSQL | Production database |
+| Django Allauth | Authentication system |
+| Cloudinary | Media file storage and optimization |
 
 ### Frontend
-- **Bootstrap 5**: Responsive CSS framework
-- **Crispy Forms**: Enhanced form rendering
-- **Summernote**: Rich text editing for descriptions
+
+| Technology | Purpose |
+|------------|---------|
+| Bootstrap 5 | Responsive CSS framework |
+| Bootstrap Icons | Icon library via CDN |
+| Crispy Forms | Enhanced form rendering |
+| Summernote | Rich text editing for descriptions |
+| Flatpickr | Inline calendar date picker |
 
 ### Development Tools
-- **Visual Studio Code**: Primary code editor and IDE
-- **Git**: Version control system
-- **GitHub**: [Repository](https://github.com/iliana-marquez/axoelote-foodtruck-app) hosting and project management ([GitHub Project](https://github.com/users/iliana-marquez/projects/13/views/1))
+
+| Tool | Purpose |
+|------|---------|
+| Visual Studio Code | Primary IDE |
+| Git | Version control |
+| GitHub | Repository hosting and project management |
+
+### Deployment
+
+| Technology | Purpose |
+|------------|---------|
+| Heroku | Cloud platform hosting |
+| WhiteNoise | Static file serving |
+| Environment Variables | Secure configuration management |
+
+---
 
 ### Deployment
 - **Heroku**: Cloud platform hosting
