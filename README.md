@@ -8,9 +8,10 @@
 Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.herokuapp.com/)
 ![Axolote Website Screenshot](https://res.cloudinary.com/dj2lk9daf/image/upload/v1757932902/axoelote-website_u9k5v5.png)
 
-**Technical highlights:** User authentication, CRUD operations, automated workflows, responsive design, and cloud deployment.
+**Technical highlights:** User authentication, full CRUD operations with user feedback, automated testing, responsive design, and cloud deployment.
 
-#### The Details:
+## Table of Contents
+
 - [Project Overview](#project-overview)
   - [User Stories](#user-stories)
   - [Key Features](#key-features)
@@ -53,19 +54,25 @@ Axoelote Food Truck [Webapp Live](https://axoelote-foodtruck-6de5775aa776.heroku
 
 ### User Stories
 
+User stories were managed using GitHub Projects with MoSCoW prioritization (Must Have, Should Have, Could Have, Won't Have).
+
+![GitHub Project Board](placeholder_project_board.png)
+
 As a **customer**, I want:
-- To easily see where the food truck will be today, so I don’t go to the wrong location.
-- To book the food truck for my private event, providing details such as date, time, and number of guests.
-- To know the booking rules (minimum guests, advance notice) so I understand the requirements before submitting.
-- To upload event photos or inspiration when making a booking request.
-- To log in securely so I can manage my bookings.
+- To easily see where the food truck will be today, so I don't go to the wrong location
+- To book the food truck for my private event, providing details such as date, time, and number of guests
+- To know the booking rules (minimum guests, advance notice) so I understand requirements before submitting
+- To view and manage my bookings with the ability to edit or cancel them
+- To see real-time availability when selecting dates for my booking
+- To log in securely so I can manage my bookings
 
 As an **admin/food truck owner**, I want:
-- To create and manage events directly (open events, private events, or closures).
-- To have address validation and mandatory fields for open/private events.
-- To see events ordered chronologically in the admin panel for easier management.
-- To filter and search events by type, status, and creation date.
-- To maintain control over which staff users can manage events in the admin panel.
+- To create and manage events directly (open events, private events, or closures)
+- To have address validation and mandatory fields for open/private events
+- To see events ordered chronologically in the admin panel for easier management
+- To filter and search events by type, status, and creation date
+- To maintain control over which staff users can manage events
+- To have my events automatically override the regular schedule display, so customers always see current location information
 
 As a **visitor**, I want:
 - To understand the purpose of the app quickly from the landing page.
